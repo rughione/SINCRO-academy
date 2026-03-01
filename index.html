@@ -1,0 +1,784 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>S.I.N.C.R.O. - Talent Forge Academy</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Inter:wght@300;400;600;800&display=swap');
+        
+        * { font-family: 'Inter', sans-serif; }
+        h1, h2, h3, .font-display { font-family: 'Space Grotesk', sans-serif; }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #00f5d4 0%, #00bbf9 50%, #fee440 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .slide-in {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.8s ease-out;
+        }
+        
+        .slide-in.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        
+        .pulse-ring {
+            animation: pulse-ring 2s cubic-bezier(0.215, 0.61, 0.355, 1) infinite;
+        }
+        
+        @keyframes pulse-ring {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 245, 212, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 20px rgba(0, 245, 212, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(0, 245, 212, 0); }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        
+        .scientific-card {
+            transition: all 0.3s ease;
+        }
+        
+        .scientific-card:hover {
+            transform: translateX(10px);
+            border-left-width: 4px;
+        }
+        
+        .tab-active {
+            background: linear-gradient(90deg, #00f5d4, #00bbf9);
+            color: #0f172a;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white overflow-x-hidden">
+
+    <!-- Navigation -->
+    <nav class="fixed w-full z-50 glass-panel border-b border-slate-700/50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-20">
+                <div class="flex items-center space-x-3">
+                    <div class="w-10 h-10 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center pulse-ring">
+                        <i data-lucide="activity" class="w-6 h-6 text-white"></i>
+                    </div>
+                    <span class="font-display font-bold text-2xl tracking-tight">S.I.N.C.R.O.</span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <a href="login.html" class="bg-cyan-500 hover:bg-cyan-400 text-slate-900 px-6 py-2 rounded-full font-bold transition-all">
+                        Area Staff
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="relative min-h-screen flex items-center justify-center pt-20 overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-slate-900 via-slate-800 to-slate-900 opacity-90"></div>
+        
+        <div class="absolute inset-0 overflow-hidden">
+            <div class="absolute top-20 left-10 w-72 h-72 bg-cyan-500/20 rounded-full blur-3xl float-animation"></div>
+            <div class="absolute bottom-20 right-10 w-96 h-96 bg-blue-600/20 rounded-full blur-3xl float-animation" style="animation-delay: 2s;"></div>
+        </div>
+
+        <div class="relative z-10 max-w-7xl mx-auto px-4 text-center">
+            <div class="inline-block mb-6 px-4 py-2 rounded-full bg-slate-800/50 border border-cyan-500/30 text-cyan-400 text-sm font-semibold tracking-wider uppercase slide-in">
+                Dipartimento Tecnico - Settore Giovanile
+            </div>
+            
+            <h1 class="font-display text-5xl md:text-7xl lg:text-8xl font-bold mb-6 leading-tight slide-in">
+                <span class="gradient-text">S.I.N.C.R.O.</span>
+            </h1>
+            
+            <p class="text-xl md:text-3xl text-slate-300 mb-8 font-light slide-in">
+                Sistema di Immersione <span class="text-cyan-400 font-semibold">Neuro-Cognitiva</span> a Risposta Ottimale
+            </p>
+            
+            <p class="max-w-3xl mx-auto text-lg text-slate-400 mb-12 slide-in">
+                Dal modello <strong class="text-cyan-400">Talent Forge</strong> alla formazione d'élite: trasformiamo il talento da evento casuale a risultato ingegneristico
+            </p>
+
+            <div class="mt-20 grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto slide-in">
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-cyan-400 font-display">400+</div>
+                    <div class="text-sm text-slate-400 mt-2">Atleti Formati</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-cyan-400 font-display">4x</div>
+                    <div class="text-sm text-slate-400 mt-2">Allenamenti/Sett.</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-cyan-400 font-display">12'</div>
+                    <div class="text-sm text-slate-400 mt-2">Ciclo Rotazione</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-4xl font-bold text-cyan-400 font-display">100%</div>
+                    <div class="text-sm text-slate-400 mt-2">Data-Driven</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Vision Section -->
+    <section class="py-24 relative">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid md:grid-cols-2 gap-16 items-center">
+                <div class="slide-in">
+                    <h2 class="font-display text-4xl md:text-5xl font-bold mb-6">
+                        La Visione <span class="text-cyan-400">Strategica</span>
+                    </h2>
+                    <h3 class="text-2xl text-slate-300 mb-6 font-light">Il Modello <span class="text-cyan-400 font-bold">"Talent Forge"</span> applicato al Calcio Giovanile</h3>
+                    <p class="text-slate-400 text-lg leading-relaxed mb-6">
+                        Trasformiamo la percezione del settore giovanile: da società storica dilettantistica a 
+                        <strong class="text-white">Centro di Formazione d'Élite</strong>.
+                    </p>
+                    <p class="text-slate-400 text-lg leading-relaxed mb-8">
+                        Non aspettiamo che il talento nasca per caso. Utilizziamo un <span class="text-cyan-400">processo ingegneristico</span> 
+                        per produrre crescita tecnica misurabile, fornendo dati certi sulla progressione di ogni singolo atleta.
+                    </p>
+                    
+                    <div class="flex items-center gap-4 p-6 bg-slate-800/50 rounded-2xl border border-slate-700">
+                        <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center">
+                            <i data-lucide="target" class="w-6 h-6 text-cyan-400"></i>
+                        </div>
+                        <div>
+                            <div class="font-bold text-white">Obiettivo Zero</div>
+                            <div class="text-sm text-slate-400">Eliminazione dell'approssimazione tipica del calcio giovanile</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="relative slide-in">
+                    <div class="absolute inset-0 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-3xl blur-2xl opacity-20"></div>
+                    <div class="relative glass-panel rounded-3xl p-8 border border-slate-700">
+                        <div class="flex justify-between items-center mb-8">
+                            <span class="text-sm font-semibold text-cyan-400 uppercase tracking-wider">Talent Forge vs Tradizionale</span>
+                            <i data-lucide="bar-chart-3" class="w-6 h-6 text-slate-400"></i>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <div class="p-4 bg-slate-800/50 rounded-xl border border-slate-700 opacity-50">
+                                <div class="flex justify-between items-center mb-2">
+                                    <span class="font-semibold text-slate-400">Modello Tradizionale</span>
+                                    <span class="text-xs bg-slate-700 px-2 py-1 rounded">Selettivo</span>
+                                </div>
+                                <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
+                                    <div class="h-full w-1/3 bg-slate-600 rounded-full"></div>
+                                </div>
+                                <div class="mt-2 text-xs text-slate-500">Scouting passivo • Allenamento generico • Crescita casuale</div>
+                            </div>
+                            
+                            <div class="p-4 bg-gradient-to-r from-cyan-500/10 to-blue-600/10 rounded-xl border border-cyan-500/30 relative overflow-hidden">
+                                <div class="absolute top-0 right-0 w-20 h-20 bg-cyan-400/20 rounded-full blur-xl"></div>
+                                <div class="flex justify-between items-center mb-2 relative z-10">
+                                    <span class="font-bold text-white">Talent Forge System</span>
+                                    <span class="text-xs bg-cyan-500 text-slate-900 px-2 py-1 rounded font-bold">Costruttivo</span>
+                                </div>
+                                <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
+                                    <div class="h-full w-full bg-gradient-to-r from-cyan-400 to-blue-500 rounded-full animate-pulse"></div>
+                                </div>
+                                <div class="mt-2 text-xs text-cyan-300">Sviluppo attivo • Pratica deliberata • Crescita ingegnerizzata</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Methodology Section -->
+    <section class="py-24 bg-slate-800/30 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-b from-transparent via-cyan-500/5 to-transparent"></div>
+        
+        <div class="max-w-7xl mx-auto px-4 relative z-10">
+            <div class="text-center mb-16 slide-in">
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-4">Il Cuore <span class="gradient-text">Metodologico</span></h2>
+                <p class="text-xl text-slate-400">L'Immersione Totale nel Gioco Reale</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-16">
+                <div class="glass-panel rounded-3xl p-8 border border-red-500/20 slide-in">
+                    <div class="w-16 h-16 rounded-2xl bg-red-500/10 flex items-center justify-center mb-6">
+                        <i data-lucide="x-circle" class="w-8 h-8 text-red-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-red-400">Basta Addestramento Analitico</h3>
+                    <p class="text-slate-400 leading-relaxed">
+                        Scomporre il gioco in esercizi statici (file, conetti) produce giocatori che conoscono la 
+                        <strong>"grammatica"</strong> ma non sanno sostenere la <strong>"conversazione"</strong> del campo.
+                    </p>
+                    <div class="mt-6 flex gap-2">
+                        <span class="px-3 py-1 bg-red-500/10 text-red-400 rounded-full text-sm">File statiche</span>
+                        <span class="px-3 py-1 bg-red-500/10 text-red-400 rounded-full text-sm">Conetti rigidi</span>
+                        <span class="px-3 py-1 bg-red-500/10 text-red-400 rounded-full text-sm">No pressione</span>
+                    </div>
+                </div>
+
+                <div class="glass-panel rounded-3xl p-8 border border-cyan-500/20 slide-in" style="animation-delay: 0.2s;">
+                    <div class="w-16 h-16 rounded-2xl bg-cyan-500/10 flex items-center justify-center mb-6">
+                        <i data-lucide="check-circle" class="w-8 h-8 text-cyan-400"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold mb-4 text-cyan-400">Apprendimento Situazionale</h3>
+                    <p class="text-slate-400 leading-relaxed">
+                        A partire dagli Esordienti, i ragazzi vengono immersi nel <strong>contesto reale</strong> del gioco. 
+                        La tecnica non è un fine, ma lo strumento per risolvere problemi tattici sotto pressione.
+                    </p>
+                    <div class="mt-6 flex gap-2">
+                        <span class="px-3 py-1 bg-cyan-500/10 text-cyan-400 rounded-full text-sm">Partite a tema</span>
+                        <span class="px-3 py-1 bg-cyan-500/10 text-cyan-400 rounded-full text-sm">Decisioni reali</span>
+                        <span class="px-3 py-1 bg-cyan-500/10 text-cyan-400 rounded-full text-sm">Pressione costante</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- EXPANDED Science Section -->
+    <section class="py-24">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16 slide-in">
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-4">I Pilastri <span class="gradient-text">Scientifici</span></h2>
+                <p class="text-xl text-slate-400 mb-8">La Scienza della Performance Applicata</p>
+                
+                <div class="inline-flex items-center gap-2 px-6 py-3 bg-slate-800/50 rounded-full border border-slate-700">
+                    <i data-lucide="microscope" class="w-5 h-5 text-cyan-400"></i>
+                    <span class="text-sm text-slate-300">Metodologie validate dalla comunità scientifica internazionale</span>
+                </div>
+            </div>
+
+            <!-- K. Anders Ericsson - Detailed -->
+            <div class="mb-20 slide-in">
+                <div class="glass-panel rounded-3xl p-8 md:p-12 border border-cyan-500/20 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 w-64 h-64 bg-cyan-500/10 rounded-full blur-3xl"></div>
+                    
+                    <div class="grid lg:grid-cols-3 gap-8 relative z-10">
+                        <div class="lg:col-span-1">
+                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center mb-6">
+                                <i data-lucide="brain" class="w-10 h-10 text-white"></i>
+                            </div>
+                            <h3 class="text-3xl font-bold mb-2">K. Anders Ericsson</h3>
+                            <p class="text-cyan-400 font-semibold mb-4">1937-2020 • Università della Florida</p>
+                            <p class="text-sm text-slate-400 leading-relaxed">
+                                Psicologo cognitivo svedese, pioniere dello studio dell'eccellenza. La sua ricerca del 1993 
+                                <em>"The Role of Deliberate Practice in the Acquisition of Expert Performance"</em> 
+                                ha rivoluzionato la comprensione dello sviluppo del talento.
+                            </p>
+                        </div>
+
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="bg-slate-800/50 rounded-2xl p-6 border-l-4 border-cyan-500 scientific-card">
+                                <h4 class="text-xl font-bold mb-3 flex items-center gap-2">
+                                    <i data-lucide="target" class="w-5 h-5 text-cyan-400"></i>
+                                    La Pratica Deliberata (Deliberate Practice)
+                                </h4>
+                                <p class="text-slate-300 mb-4">
+                                    Ericsson ha dimostrato che l'eccellenza non è frutto di talento innato, ma di una 
+                                    <strong>pratica specifica e strutturata</strong>. Nel suo studio fondamentale presso l'Accademia di Musica di Berlino Ovest (1993), 
+                                    ha scoperto che i musicisti di più alto livello non avevano differenze nelle capacità cognitive generali, 
+                                    ma eccellevano in compiti specifici del dominio grazie al tempo accumulato in pratica deliberata.
+                                </p>
+                                <div class="grid md:grid-cols-3 gap-4 mt-4">
+                                    <div class="bg-slate-900/50 p-4 rounded-xl">
+                                        <div class="text-cyan-400 font-bold text-lg mb-1">26%</div>
+                                        <div class="text-xs text-slate-400">Varianza spiegata nei giochi</div>
+                                    </div>
+                                    <div class="bg-slate-900/50 p-4 rounded-xl">
+                                        <div class="text-cyan-400 font-bold text-lg mb-1">18%</div>
+                                        <div class="text-xs text-slate-400">Varianza nello sport</div>
+                                    </div>
+                                    <div class="bg-slate-900/50 p-4 rounded-xl">
+                                        <div class="text-cyan-400 font-bold text-lg mb-1">10.000h</div>
+                                        <div class="text-xs text-slate-400">Mitologia vs Realtà scientifica</div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800/50 rounded-2xl p-6 border-l-4 border-blue-500 scientific-card">
+                                <h4 class="text-xl font-bold mb-3 flex items-center gap-2">
+                                    <i data-lucide="git-branch" class="w-5 h-5 text-blue-400"></i>
+                                    I Tre Vincoli della Performance
+                                </h4>
+                                <p class="text-slate-300 mb-4">
+                                    Ericsson identifica tre fattori che limitano lo sviluppo dell'expertise:
+                                </p>
+                                <div class="space-y-3">
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 text-blue-400 font-bold text-sm">1</div>
+                                        <div>
+                                            <strong class="text-white">Motivazione:</strong>
+                                            <span class="text-slate-400 text-sm">Il tipo e la quantità appropriata di motivazione per sostenere l'allenamento per periodi estesi</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 text-blue-400 font-bold text-sm">2</div>
+                                        <div>
+                                            <strong class="text-white">Risorse:</strong>
+                                            <span class="text-slate-400 text-sm">Accesso a istruttori qualificati, attrezzature e supporti per massimizzare lo sviluppo</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-start gap-3">
+                                        <div class="w-8 h-8 rounded-full bg-blue-500/20 flex items-center justify-center flex-shrink-0 text-blue-400 font-bold text-sm">3</div>
+                                        <div>
+                                            <strong class="text-white">Sforzo:</strong>
+                                            <span class="text-slate-400 text-sm">Circostanze appropriate per supportare l'alto grado di esercizio (cognitivo e fisico) richiesto</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800/50 rounded-2xl p-6 border-l-4 border-yellow-500 scientific-card">
+                                <h4 class="text-xl font-bold mb-3 flex items-center gap-2">
+                                    <i data-lucide="lightbulb" class="w-5 h-5 text-yellow-400"></i>
+                                    Caratteristiche della Pratica Deliberata
+                                </h4>
+                                <div class="grid md:grid-cols-2 gap-4">
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-2 text-slate-300">
+                                            <i data-lucide="check-circle-2" class="w-4 h-4 text-yellow-400"></i>
+                                            <span class="text-sm">Attività altamente strutturata</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-slate-300">
+                                            <i data-lucide="check-circle-2" class="w-4 h-4 text-yellow-400"></i>
+                                            <span class="text-sm">Obiettivi espliciti di miglioramento</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-slate-300">
+                                            <i data-lucide="check-circle-2" class="w-4 h-4 text-yellow-400"></i>
+                                            <span class="text-sm">Feedback immediato e informativo</span>
+                                        </div>
+                                    </div>
+                                    <div class="space-y-2">
+                                        <div class="flex items-center gap-2 text-slate-300">
+                                            <i data-lucide="check-circle-2" class="w-4 h-4 text-yellow-400"></i>
+                                            <span class="text-sm">Ripetizione delle stesse/simili attività</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-slate-300">
+                                            <i data-lucide="check-circle-2" class="w-4 h-4 text-yellow-400"></i>
+                                            <span class="text-sm">Monitoraggio continuo delle performance</span>
+                                        </div>
+                                        <div class="flex items-center gap-2 text-slate-300">
+                                            <i data-lucide="check-circle-2" class="w-4 h-4 text-yellow-400"></i>
+                                            <span class="text-sm">Sforzo cognitivo elevato (non "divertente")</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-cyan-500/10 to-blue-600/10 rounded-2xl p-6 border border-cyan-500/30">
+                                <h4 class="text-lg font-bold mb-2 text-cyan-400">Applicazione nel Protocollo S.I.N.C.R.O.</h4>
+                                <p class="text-slate-300 text-sm leading-relaxed">
+                                    Ogni sessione S.I.N.C.R.O. è progettata secondo i dettami di Ericsson: 
+                                    <strong>Match Courts</strong> per il feedback immediato, <strong>The Lab</strong> per la correzione mirata, 
+                                    e il <strong>sistema di rotazione 2+1</strong> per garantire l'alta frequenza di ripetizioni 
+                                    con sforzo cognitivo costante.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Masters & Maxwell - Detailed -->
+            <div class="slide-in">
+                <div class="glass-panel rounded-3xl p-8 md:p-12 border border-purple-500/20 relative overflow-hidden">
+                    <div class="absolute top-0 left-0 w-64 h-64 bg-purple-500/10 rounded-full blur-3xl"></div>
+                    
+                    <div class="grid lg:grid-cols-3 gap-8 relative z-10">
+                        <div class="lg:col-span-1">
+                            <div class="w-20 h-20 rounded-2xl bg-gradient-to-br from-purple-400 to-pink-600 flex items-center justify-center mb-6">
+                                <i data-lucide="zap" class="w-10 h-10 text-white"></i>
+                            </div>
+                            <h3 class="text-3xl font-bold mb-2">Masters & Maxwell</h3>
+                            <p class="text-purple-400 font-semibold mb-4">University of Hong Kong • 2008</p>
+                            <p class="text-sm text-slate-400 leading-relaxed">
+                                Rich Masters e Jonathon Maxwell hanno sviluppato la <strong>Teoria del Reinvestment</strong> (2008), 
+                                spiegando il fenomeno del "choking under pressure" e come l'apprendimento implicito 
+                                protegga dallo stress competitivo.
+                            </p>
+                        </div>
+
+                        <div class="lg:col-span-2 space-y-6">
+                            <div class="bg-slate-800/50 rounded-2xl p-6 border-l-4 border-purple-500 scientific-card">
+                                <h4 class="text-xl font-bold mb-3 flex items-center gap-2">
+                                    <i data-lucide="shield" class="w-5 h-5 text-purple-400"></i>
+                                    La Teoria del Reinvestment (Reinvestment Theory)
+                                </h4>
+                                <p class="text-slate-300 mb-4">
+                                    La teoria definisce il reinvestment come: 
+                                    <em class="text-purple-300 block mt-2 pl-4 border-l-2 border-purple-500/50">
+                                        "La manipolazione della conoscenza esplicita consapevole, basata su regole, 
+                                        da parte della memoria di lavoro, per controllare la meccanica dei propri movimenti 
+                                        durante l'output motorio."
+                                    </em>
+                                </p>
+                                <p class="text-slate-300">
+                                    Sotto pressione, gli atleti tendono a "reinvestire" consapevolmente nell'esecuzione 
+                                    abilità che dovrebbero essere automatiche, causando il <strong>degrado della performance</strong> 
+                                    (choking).
+                                </p>
+                            </div>
+
+                            <div class="bg-slate-800/50 rounded-2xl p-6 border-l-4 border-pink-500 scientific-card">
+                                <h4 class="text-xl font-bold mb-3 flex items-center gap-2">
+                                    <i data-lucide="cpu" class="w-5 h-5 text-pink-400"></i>
+                                    Apprendimento Implicito vs Esplicito
+                                </h4>
+                                <div class="grid md:grid-cols-2 gap-6">
+                                    <div class="space-y-3">
+                                        <h5 class="font-bold text-red-400 flex items-center gap-2">
+                                            <i data-lucide="alert-triangle" class="w-4 h-4"></i>
+                                            Apprendimento Esplicito
+                                        </h5>
+                                        <ul class="space-y-2 text-sm text-slate-400">
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-red-500">•</span>
+                                                Istruzioni verbali dettagliate passo-passo
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-red-500">•</span>
+                                                Conoscenza dichiarativa memorizzata
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-red-500">•</span>
+                                                Alto rischio di "paralysis by analysis"
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-red-500">•</span>
+                                                Vulnerabile sotto stress (reinvestment)
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    <div class="space-y-3">
+                                        <h5 class="font-bold text-green-400 flex items-center gap-2">
+                                            <i data-lucide="check-circle" class="w-4 h-4"></i>
+                                            Apprendimento Implicito
+                                        </h5>
+                                        <ul class="space-y-2 text-sm text-slate-400">
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-green-500">•</span>
+                                                Scoperta guidata senza istruzioni eccessive
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-green-500">•</span>
+                                                Conoscenza procedurale automatica
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-green-500">•</span>
+                                                Esecuzione fluida e naturale
+                                            </li>
+                                            <li class="flex items-start gap-2">
+                                                <span class="text-green-500">•</span>
+                                                Resistente alla pressione competitiva
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="bg-slate-800/50 rounded-2xl p-6 border-l-4 border-indigo-500 scientific-card">
+                                <h4 class="text-xl font-bold mb-3 flex items-center gap-2">
+                                    <i data-lucide="activity" class="w-5 h-5 text-indigo-400"></i>
+                                    Il Ruolo dei Gangli della Base
+                                </h4>
+                                <p class="text-slate-300 mb-4">
+                                    Masters & Maxwell dimostrano che il pensiero conscio (Corteccia Prefrontale) è troppo lento 
+                                    per la velocità del calcio moderno. L'apprendimento implicito sposta le competenze nei 
+                                    <strong>Gangli della Base</strong>, centri cerebrali deputati agli automatismi.
+                                </p>
+                                <div class="bg-slate-900/50 rounded-xl p-4">
+                                    <div class="flex items-center justify-between mb-2">
+                                        <span class="text-sm text-slate-400">Velocità elaborazione</span>
+                                        <span class="text-sm font-bold text-indigo-400">Automatica > Consapevole</span>
+                                    </div>
+                                    <div class="h-2 bg-slate-700 rounded-full overflow-hidden">
+                                        <div class="h-full w-3/4 bg-indigo-500 rounded-full"></div>
+                                    </div>
+                                    <p class="text-xs text-slate-500 mt-2">
+                                        Le abilità immagazzinate implicitamente non competono per le risorse della memoria di lavoro
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div class="bg-gradient-to-r from-purple-500/10 to-pink-600/10 rounded-2xl p-6 border border-purple-500/30">
+                                <h4 class="text-lg font-bold mb-2 text-purple-400">Applicazione nel Protocollo S.I.N.C.R.O.</h4>
+                                <p class="text-slate-300 text-sm leading-relaxed">
+                                    Il protocollo satura i ragazzi di <strong>situazioni-tipo</strong> nei Match Courts senza 
+                                    eccessive istruzioni verbali. Questo favorisce l'apprendimento implicito, rendendo i giocatori 
+                                    <strong>immuni alla pressione</strong>: in partita, il loro corpo "sa" cosa fare perché la 
+                                    soluzione è stata interiorizzata a livello subconscio.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Integration Box -->
+            <div class="mt-12 slide-in">
+                <div class="glass-panel rounded-3xl p-8 border border-slate-700 bg-gradient-to-r from-slate-800/50 to-slate-900/50">
+                    <h3 class="text-2xl font-bold mb-6 text-center">Sinergia Scientifica nel Protocollo S.I.N.C.R.O.</h3>
+                    <div class="grid md:grid-cols-2 gap-8">
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-full bg-cyan-500/20 flex items-center justify-center flex-shrink-0">
+                                <span class="text-cyan-400 font-bold">E</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-cyan-400 mb-2">Ericsson fornisce la Struttura</h4>
+                                <p class="text-sm text-slate-400">
+                                    Quantità, intensità e qualità della pratica. Il sistema Elite 4 garantisce il volume 
+                                    necessario di pratica deliberata strutturata.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="flex items-start gap-4">
+                            <div class="w-12 h-12 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0">
+                                <span class="text-purple-400 font-bold">M</span>
+                            </div>
+                            <div>
+                                <h4 class="font-bold text-purple-400 mb-2">Masters & Maxwell forniscono la Qualità</h4>
+                                <p class="text-sm text-slate-400">
+                                    Metodologia di apprendimento. L'immersione situazione garantisce che le competenze 
+                                    siano acquisite implicitamente, resistendo allo stress.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-8 pt-6 border-t border-slate-700 text-center">
+                        <p class="text-slate-300">
+                            <i data-lucide="infinity" class="w-5 h-5 inline mr-2 text-cyan-400"></i>
+                            <strong>Risultato:</strong> Atleti che non solo accumulano ore di alta qualità, ma le accumulano 
+                            in modo "a prova di pressione"
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Elite 4 System -->
+    <section class="py-24 bg-slate-800/30">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16 slide-in">
+                <h2 class="font-display text-4xl md:text-5xl font-bold mb-4">Architettura <span class="gradient-text">Operativa</span></h2>
+                <h3 class="text-3xl font-bold text-white mb-4">Il Sistema "ELITE 4"</h3>
+                <p class="text-xl text-slate-400 max-w-3xl mx-auto">
+                    Volume di formazione pari a quello dei club professionistici per Esordienti e Giovanissimi
+                </p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="flex justify-center mb-12 slide-in">
+                <div class="inline-flex bg-slate-800 rounded-full p-1 border border-slate-700">
+                    <button onclick="switchTab('syncro')" id="tab-syncro" class="px-6 py-3 rounded-full font-semibold transition-all tab-active">
+                        3x S.I.N.C.R.O.
+                    </button>
+                    <button onclick="switchTab('performance')" id="tab-performance" class="px-6 py-3 rounded-full font-semibold transition-all text-slate-400 hover:text-white">
+                        1x PERFORMANCE
+                    </button>
+                </div>
+            </div>
+
+            <!-- Content -->
+            <div id="content-syncro" class="slide-in">
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="glass-panel rounded-2xl p-6 border border-cyan-500/30 relative overflow-hidden group hover:scale-105 transition-transform">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-400/10 rounded-full blur-2xl group-hover:bg-cyan-400/20 transition-all"></div>
+                        <div class="relative z-10">
+                            <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-4">
+                                <span class="text-2xl font-bold text-cyan-400">A</span>
+                            </div>
+                            <h4 class="text-xl font-bold mb-2">Match Court 1</h4>
+                            <p class="text-slate-400 text-sm mb-4">Partite a tema con vincoli ambientali che obbligano il cervello a trovare soluzioni tattiche istantanee.</p>
+                            <div class="flex items-center gap-2 text-xs text-cyan-400">
+                                <i data-lucide="clock" class="w-4 h-4"></i>
+                                <span>12 minuti</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-2xl p-6 border border-cyan-500/30 relative overflow-hidden group hover:scale-105 transition-transform">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-cyan-400/10 rounded-full blur-2xl group-hover:bg-cyan-400/20 transition-all"></div>
+                        <div class="relative z-10">
+                            <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-4">
+                                <span class="text-2xl font-bold text-cyan-400">B</span>
+                            </div>
+                            <h4 class="text-xl font-bold mb-2">Match Court 2</h4>
+                            <p class="text-slate-400 text-sm mb-4">Variante tattica alternativa per stimolare l'adattabilità neuro-cognitiva in contesti diversi.</p>
+                            <div class="flex items-center gap-2 text-xs text-cyan-400">
+                                <i data-lucide="clock" class="w-4 h-4"></i>
+                                <span>12 minuti</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-panel rounded-2xl p-6 border border-yellow-500/30 relative overflow-hidden group hover:scale-105 transition-transform bg-yellow-500/5">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-yellow-400/10 rounded-full blur-2xl group-hover:bg-yellow-400/20 transition-all"></div>
+                        <div class="relative z-10">
+                            <div class="w-12 h-12 rounded-xl bg-yellow-500/20 flex items-center justify-center mb-4">
+                                <span class="text-2xl font-bold text-yellow-400">C</span>
+                            </div>
+                            <h4 class="text-xl font-bold mb-2 text-yellow-400">The Lab</h4>
+                            <p class="text-slate-400 text-sm mb-4">Laboratorio intensivo di 1vs1 e duelli. È qui che il <strong>dato individuale</strong> viene isolato e potenziato.</p>
+                            <div class="flex items-center gap-2 text-xs text-yellow-400">
+                                <i data-lucide="clock" class="w-4 h-4"></i>
+                                <span>12 minuti</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-8 glass-panel rounded-2xl p-6 border border-slate-700 text-center">
+                    <p class="text-slate-300">
+                        <i data-lucide="refresh-cw" class="w-5 h-5 inline mr-2 text-cyan-400"></i>
+                        <strong>Sistema 2+1:</strong> Rotazione ciclica ogni 12 minuti per massimizzare il carico cognitivo e tecnico
+                    </p>
+                </div>
+            </div>
+
+            <div id="content-performance" class="hidden slide-in">
+                <div class="glass-panel rounded-3xl p-8 border border-purple-500/30 bg-purple-500/5">
+                    <div class="grid md:grid-cols-2 gap-8 items-center">
+                        <div>
+                            <div class="inline-block px-4 py-2 rounded-full bg-purple-500/20 text-purple-400 text-sm font-bold mb-4">
+                                SESSIONE SETTIMANALE DEDICATA
+                            </div>
+                            <h3 class="text-3xl font-bold mb-4">Performance Neuromuscolare "a secco"</h3>
+                            <p class="text-slate-400 text-lg mb-6">
+                                Una seduta dedicata esclusivamente alla performance neuromuscolare. 
+                                Il lavoro atletico non sottrae tempo al gioco, ma lo <strong class="text-purple-400">potenzia</strong>.
+                            </p>
+                            <div class="space-y-4">
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+                                        <i data-lucide="trending-up" class="w-4 h-4 text-purple-400"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-white">Costruzione del "Motore"</h4>
+                                        <p class="text-sm text-slate-400">Il ragazzo costruisce la base fisica necessaria per eseguire le decisioni del cervello S.I.N.C.R.O.</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-start gap-4">
+                                    <div class="w-8 h-8 rounded-full bg-purple-500/20 flex items-center justify-center flex-shrink-0 mt-1">
+                                        <i data-lucide="shield" class="w-4 h-4 text-purple-400"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-bold text-white">Pre-habilitation</h4>
+                                        <p class="text-sm text-slate-400">Preparatore Atletico FIGC monitora l'integrità fisica e previene infortuni.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="relative">
+                            <div class="aspect-square rounded-2xl bg-gradient-to-br from-purple-600 to-blue-600 flex items-center justify-center">
+                                <i data-lucide="activity" class="w-32 h-32 text-white/20"></i>
+                                <div class="absolute inset-0 flex items-center justify-center">
+                                    <div class="text-center">
+                                        <div class="text-5xl font-bold text-white font-display">1/4</div>
+                                        <div class="text-purple-200 mt-2">Sessioni Settimanali</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="py-24 relative overflow-hidden">
+        <div class="absolute inset-0 bg-gradient-to-r from-cyan-600 to-blue-600"></div>
+        <div class="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg width=\'60\' height=\'60\' viewBox=\'0 0 60 60\' xmlns=\'http://www.w3.org/2000/svg\'%3E%3Cg fill=\'none\' fill-rule=\'evenodd\'%3E%3Cg fill=\'%23ffffff\' fill-opacity=\'0.05\'%3E%3Cpath d=\'M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z\'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')] opacity-20"></div>
+        
+        <div class="max-w-4xl mx-auto px-4 text-center relative z-10">
+            <h2 class="font-display text-4xl md:text-6xl font-bold mb-6 text-white">
+                L'Eccellenza come <br/>Unica Opzione
+            </h2>
+            <p class="text-xl text-white/90 mb-12 max-w-2xl mx-auto">
+                Stiamo dotando i nostri 400 ragazzi di un vantaggio competitivo inattaccabile: 
+                il <strong>triplo dell'esperienza situazionale</strong> rispetto a qualunque altra realtà cittadina.
+            </p>
+            
+            <div class="flex flex-col md:flex-row gap-4 justify-center">
+                <a href="login.html" class="px-8 py-4 bg-white text-slate-900 rounded-full font-bold text-lg hover:bg-slate-100 transition-all transform hover:scale-105 shadow-2xl text-center">
+                    Accedi al Portale Talent Forge
+                </a>
+                <button onclick="window.print()" class="px-8 py-4 bg-transparent border-2 border-white text-white rounded-full font-bold text-lg hover:bg-white/10 transition-all">
+                    Scarica Manifesto PDF
+                </button>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-white/20 text-white/60 text-sm">
+                <p>Direzione Sviluppo Eccellenza Settore Giovanile</p>
+                <p class="mt-2 font-semibold">Responsabile Tecnico Settore Giovanile</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-slate-950 py-12 border-t border-slate-800">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+                    <i data-lucide="activity" class="w-4 h-4 text-white"></i>
+                </div>
+                <span class="font-display font-bold text-xl">S.I.N.C.R.O.</span>
+            </div>
+            <div class="text-slate-500 text-sm">
+                © 2026 Dipartimento Tecnico - Tutti i diritti riservati
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        lucide.createIcons();
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) entry.target.classList.add('visible');
+            });
+        }, { threshold: 0.1 });
+
+        document.querySelectorAll('.slide-in').forEach(el => observer.observe(el));
+
+        function switchTab(tab) {
+            const syncroContent = document.getElementById('content-syncro');
+            const perfContent = document.getElementById('content-performance');
+            const syncroTab = document.getElementById('tab-syncro');
+            const perfTab = document.getElementById('tab-performance');
+
+            if (tab === 'syncro') {
+                syncroContent.classList.remove('hidden');
+                perfContent.classList.add('hidden');
+                syncroTab.classList.add('tab-active');
+                syncroTab.classList.remove('text-slate-400');
+                perfTab.classList.remove('tab-active');
+                perfTab.classList.add('text-slate-400');
+            } else {
+                syncroContent.classList.add('hidden');
+                perfContent.classList.remove('hidden');
+                perfTab.classList.add('tab-active');
+                perfTab.classList.remove('text-slate-400');
+                syncroTab.classList.remove('tab-active');
+                syncroTab.classList.add('text-slate-400');
+            }
+        }
+    </script>
+</body>
+</html>
