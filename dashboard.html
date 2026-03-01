@@ -3,12 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Allenatore - S.I.N.C.R.O.</title>
+    <title>Admin - S.I.N.C.R.O. Talent Forge</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Inter:wght@300;400;600;800&display=swap');
@@ -21,8 +22,10 @@
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        .input-field {
-            @apply w-full px-4 py-2 bg-slate-800/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none transition-colors;
+        .gradient-text {
+            background: linear-gradient(135deg, #00f5d4 0%, #00bbf9 50%, #fee440 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
     </style>
 </head>
@@ -36,13 +39,16 @@
                     <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
                         <i data-lucide="activity" class="w-4 h-4 text-white"></i>
                     </div>
-                    <span class="font-display font-bold text-xl">S.I.N.C.R.O. <span class="text-slate-400 font-normal">| Area Staff</span></span>
+                    <span class="font-display font-bold text-xl">S.I.N.C.R.O. <span class="text-cyan-400">ADMIN</span></span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <span id="userName" class="text-sm text-slate-400"></span>
+                    <button onclick="showSection('approvazioni')" class="relative p-2 text-slate-400 hover:text-white">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span id="badgeApprovazioni" class="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center hidden">0</span>
+                    </button>
+                    <span class="text-sm text-slate-400">Amministratore</span>
                     <button onclick="logout()" class="text-red-400 hover:text-red-300 text-sm flex items-center gap-1">
                         <i data-lucide="log-out" class="w-4 h-4"></i>
-                        Esci
                     </button>
                 </div>
             </div>
@@ -51,176 +57,160 @@
 
     <div class="max-w-7xl mx-auto px-4 py-8">
         
-        <!-- Welcome -->
-        <div class="mb-8">
-            <h1 class="font-display text-3xl font-bold mb-2">Benvenuto, <span id="welcomeName">Allenatore</span></h1>
-            <p class="text-slate-400">Inserisci i dati delle valutazioni giornaliere</p>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="grid md:grid-cols-3 gap-6 mb-8">
-            <button onclick="showSection('nuova-valutazione')" 
-                class="glass-panel p-6 rounded-2xl border border-cyan-500/30 hover:border-cyan-500/60 transition-all text-left group">
-                <div class="w-12 h-12 rounded-xl bg-cyan-500/20 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <i data-lucide="plus-circle" class="w-6 h-6 text-cyan-400"></i>
+        <!-- Stats Overview -->
+        <div class="grid md:grid-cols-4 gap-6 mb-8">
+            <div class="glass-panel p-6 rounded-2xl border border-cyan-500/30">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-400 text-sm">Totale Giocatori</span>
+                    <i data-lucide="users" class="w-5 h-5 text-cyan-400"></i>
                 </div>
-                <h3 class="font-bold text-lg mb-1">Nuova Valutazione</h3>
-                <p class="text-sm text-slate-400">Inserisci dati tecnici, cognitivi o fisici</p>
-            </button>
-
-            <button onclick="showSection('lista-giocatori')"
-                class="glass-panel p-6 rounded-2xl border border-slate-700 hover:border-slate-500 transition-all text-left group">
-                <div class="w-12 h-12 rounded-xl bg-slate-700/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <i data-lucide="users" class="w-6 h-6 text-slate-400"></i>
-                </div>
-                <h3 class="font-bold text-lg mb-1">Lista Giocatori</h3>
-                <p class="text-sm text-slate-400">Visualizza anagrafiche</p>
-            </button>
-
-            <button onclick="showSection('storico')"
-                class="glass-panel p-6 rounded-2xl border border-slate-700 hover:border-slate-500 transition-all text-left group">
-                <div class="w-12 h-12 rounded-xl bg-slate-700/50 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-                    <i data-lucide="history" class="w-6 h-6 text-slate-400"></i>
-                </div>
-                <h3 class="font-bold text-lg mb-1">Storico Valutazioni</h3>
-                <p class="text-sm text-slate-400">Visualizza dati inseriti</p>
-            </button>
-        </div>
-
-        <!-- Section: Nuova Valutazione -->
-        <div id="nuova-valutazione" class="space-y-6">
+                <div class="text-3xl font-bold font-display" id="statTotalPlayers">0</div>
+            </div>
             
-            <!-- Step 1: Seleziona Giocatore -->
+            <div class="glass-panel p-6 rounded-2xl border border-purple-500/30">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-400 text-sm">Valutazioni Oggi</span>
+                    <i data-lucide="clipboard-check" class="w-5 h-5 text-purple-400"></i>
+                </div>
+                <div class="text-3xl font-bold font-display" id="statTodayEvals">0</div>
+            </div>
+            
+            <div class="glass-panel p-6 rounded-2xl border border-green-500/30">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-400 text-sm">Staff Attivo</span>
+                    <i data-lucide="user-check" class="w-5 h-5 text-green-400"></i>
+                </div>
+                <div class="text-3xl font-bold font-display" id="statActiveStaff">0</div>
+            </div>
+            
+            <div class="glass-panel p-6 rounded-2xl border border-yellow-500/30">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-400 text-sm">In Attesa</span>
+                    <i data-lucide="clock" class="w-5 h-5 text-yellow-400"></i>
+                </div>
+                <div class="text-3xl font-bold font-display" id="statPending">0</div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="flex gap-2 mb-8 overflow-x-auto pb-2">
+            <button onclick="showSection('dashboard')" id="nav-dashboard" class="px-6 py-3 rounded-full bg-cyan-500/20 text-cyan-400 font-semibold whitespace-nowrap">
+                Dashboard Giocatori
+            </button>
+            <button onclick="showSection('dettaglio')" id="nav-dettaglio" class="px-6 py-3 rounded-full bg-slate-800 text-slate-400 font-semibold whitespace-nowrap hover:text-white">
+                Analisi Dettaglio
+            </button>
+            <button onclick="showSection('approvazioni')" id="nav-approvazioni" class="px-6 py-3 rounded-full bg-slate-800 text-slate-400 font-semibold whitespace-nowrap hover:text-white">
+                Approvazioni Staff
+            </button>
+            <button onclick="showSection('database')" id="nav-database" class="px-6 py-3 rounded-full bg-slate-800 text-slate-400 font-semibold whitespace-nowrap hover:text-white">
+                Gestione Database
+            </button>
+        </div>
+
+        <!-- SECTION: Dashboard Giocatori -->
+        <div id="section-dashboard" class="space-y-6">
+            
+            <!-- Filters -->
+            <div class="glass-panel p-4 rounded-2xl border border-slate-700 flex gap-4 flex-wrap">
+                <select id="filterCat" onchange="loadPlayers()" class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600">
+                    <option value="">Tutte le categorie</option>
+                    <option value="E1">Esordienti 1°</option>
+                    <option value="E2">Esordienti 2°</option>
+                    <option value="G1">Giovanissimi 1°</option>
+                </select>
+                <select id="filterRuolo" onchange="loadPlayers()" class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600">
+                    <option value="">Tutti i ruoli</option>
+                    <option value="Portiere">Portiere</option>
+                    <option value="Difensore">Difensore</option>
+                    <option value="Centrocampista">Centrocampista</option>
+                    <option value="Attaccante">Attaccante</option>
+                </select>
+                <input type="text" id="searchPlayer" placeholder="Cerca giocatore..." onkeyup="loadPlayers()"
+                    class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600 flex-1 min-w-[200px]">
+            </div>
+
+            <!-- Players Grid -->
+            <div id="playersGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Popolato via JS -->
+            </div>
+        </div>
+
+        <!-- SECTION: Dettaglio Giocatore -->
+        <div id="section-dettaglio" class="hidden space-y-6">
             <div class="glass-panel rounded-2xl p-6 border border-slate-700">
-                <h2 class="font-display text-xl font-bold mb-4 flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm">1</span>
-                    Seleziona Giocatore
-                </h2>
-                
-                <div class="grid md:grid-cols-3 gap-4">
+                <div class="flex justify-between items-start mb-6">
                     <div>
-                        <label class="block text-sm font-medium text-slate-300 mb-2">Categoria</label>
-                        <select id="filterCategoria" onchange="loadGiocatori()" class="input-field">
-                            <option value="">Tutte</option>
-                            <option value="E1">Esordienti 1° anno</option>
-                            <option value="E2">Esordienti 2° anno</option>
-                            <option value="G1">Giovanissimi 1° anno</option>
-                        </select>
+                        <h2 class="font-display text-2xl font-bold mb-2" id="detailName">Seleziona un giocatore</h2>
+                        <p class="text-slate-400" id="detailInfo">Dalla dashboard per vedere i dettagli</p>
                     </div>
-                    <div class="md:col-span-2">
-                        <label class="block text-sm font-medium text-slate-300 mb-2">Giocatore</label>
-                        <select id="selectGiocatore" class="input-field" required>
-                            <option value="">Seleziona un giocatore...</option>
-                        </select>
+                    <div class="text-right">
+                        <div class="text-sm text-slate-400">Talent Forge Score</div>
+                        <div class="text-4xl font-bold gradient-text font-display" id="detailScore">--</div>
                     </div>
                 </div>
-            </div>
 
-            <!-- Step 2: Tipo Valutazione -->
-            <div class="glass-panel rounded-2xl p-6 border border-slate-700">
-                <h2 class="font-display text-xl font-bold mb-4 flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm">2</span>
-                    Tipo di Valutazione
-                </h2>
-                
-                <div class="grid md:grid-cols-4 gap-4">
-                    <button onclick="setTipoValutazione('tecnica')" id="btn-tecnica" 
-                        class="p-4 rounded-xl border border-slate-600 hover:border-cyan-500/50 transition-all text-center">
-                        <i data-lucide="target" class="w-8 h-8 text-cyan-400 mx-auto mb-2"></i>
-                        <div class="font-semibold">Tecnica</div>
-                        <div class="text-xs text-slate-400">The Lab</div>
-                    </button>
-                    
-                    <button onclick="setTipoValutazione('cognitiva')" id="btn-cognitiva"
-                        class="p-4 rounded-xl border border-slate-600 hover:border-purple-500/50 transition-all text-center">
-                        <i data-lucide="brain" class="w-8 h-8 text-purple-400 mx-auto mb-2"></i>
-                        <div class="font-semibold">Cognitiva</div>
-                        <div class="text-xs text-slate-400">Match Court</div>
-                    </button>
-                    
-                    <button onclick="setTipoValutazione('fisica')" id="btn-fisica"
-                        class="p-4 rounded-xl border border-slate-600 hover:border-green-500/50 transition-all text-center">
-                        <i data-lucide="activity" class="w-8 h-8 text-green-400 mx-auto mb-2"></i>
-                        <div class="font-semibold">Fisica</div>
-                        <div class="text-xs text-slate-400">Performance</div>
-                    </button>
-                    
-                    <button onclick="setTipoValutazione('psicologica')" id="btn-psicologica"
-                        class="p-4 rounded-xl border border-slate-600 hover:border-pink-500/50 transition-all text-center">
-                        <i data-lucide="heart" class="w-8 h-8 text-pink-400 mx-auto mb-2"></i>
-                        <div class="font-semibold">Psicologica</div>
-                        <div class="text-xs text-slate-400">Comportamento</div>
-                    </button>
+                <!-- Charts -->
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-slate-800/50 p-4 rounded-xl">
+                        <h3 class="font-semibold mb-4">Andamento 6 Mesi</h3>
+                        <canvas id="trendChart" height="200"></canvas>
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-xl">
+                        <h3 class="font-semibold mb-4">Radar Competenze</h3>
+                        <canvas id="radarChart" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Storico Valutazioni -->
+                <h3 class="font-semibold mb-4">Storico Completo Valutazioni</h3>
+                <div id="detailHistory" class="space-y-2 max-h-96 overflow-y-auto">
+                    <!-- Popolato via JS -->
                 </div>
             </div>
+        </div>
 
-            <!-- Step 3: Form Dati -->
-            <div id="formContainer" class="hidden glass-panel rounded-2xl p-6 border border-slate-700">
-                <h2 class="font-display text-xl font-bold mb-4 flex items-center gap-2">
-                    <span class="w-8 h-8 rounded-full bg-cyan-500/20 text-cyan-400 flex items-center justify-center text-sm">3</span>
-                    Inserisci Dati
-                </h2>
-                
-                <form id="valutazioneForm" class="space-y-6">
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-2">Data Valutazione</label>
-                            <input type="date" id="dataValutazione" required class="input-field">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-slate-300 mb-2">Sessione</label>
-                            <select id="sessione" class="input-field">
-                                <option value="A">Match Court A</option>
-                                <option value="B">Match Court B</option>
-                                <option value="Lab">The Lab</option>
-                                <option value="Performance">Performance</option>
-                            </select>
-                        </div>
-                    </div>
+        <!-- SECTION: Approvazioni -->
+        <div id="section-approvazioni" class="hidden space-y-4">
+            <h2 class="font-display text-2xl font-bold mb-6">Richieste di Accesso Pendenti</h2>
+            <div id="pendingApprovals" class="space-y-4">
+                <!-- Popolato via JS -->
+            </div>
+        </div>
 
-                    <div id="dynamicFields" class="space-y-4"></div>
-
-                    <div class="pt-4 border-t border-slate-700">
-                        <label class="block text-sm font-medium text-slate-300 mb-2">Note Generali</label>
-                        <textarea id="note" rows="3" class="input-field" placeholder="Osservazioni specifiche..."></textarea>
-                    </div>
-
-                    <div class="flex gap-4">
-                        <button type="submit" 
-                            class="flex-1 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 text-white font-bold rounded-xl hover:opacity-90 transition-opacity">
-                            Salva Valutazione
-                        </button>
-                        <button type="button" onclick="resetForm()"
-                            class="px-6 py-3 border border-slate-600 text-slate-300 rounded-xl hover:border-slate-400 transition-colors">
-                            Annulla
-                        </button>
-                    </div>
+        <!-- SECTION: Database -->
+        <div id="section-database" class="hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="font-display text-2xl font-bold">Gestione Database</h2>
+                <button onclick="exportData()" class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors">
+                    <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+                    Esporta CSV
+                </button>
+            </div>
+            
+            <div class="glass-panel p-6 rounded-2xl border border-slate-700">
+                <h3 class="font-semibold mb-4">Aggiungi Nuovo Giocatore</h3>
+                <form id="addPlayerForm" class="grid md:grid-cols-2 gap-4">
+                    <input type="text" id="newNome" placeholder="Nome" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
+                    <input type="text" id="newCognome" placeholder="Cognome" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
+                    <input type="date" id="newDataNascita" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
+                    <select id="newCategoria" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
+                        <option value="">Categoria</option>
+                        <option value="E1">Esordienti 1°</option>
+                        <option value="E2">Esordienti 2°</option>
+                        <option value="G1">Giovanissimi 1°</option>
+                    </select>
+                    <select id="newRuolo" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
+                        <option value="">Ruolo</option>
+                        <option value="Portiere">Portiere</option>
+                        <option value="Difensore">Difensore</option>
+                        <option value="Centrocampista">Centrocampista</option>
+                        <option value="Attaccante">Attaccante</option>
+                    </select>
+                    <button type="submit" class="px-4 py-2 bg-cyan-500 text-slate-900 rounded-lg font-bold hover:bg-cyan-400 transition-colors">
+                        Aggiungi Giocatore
+                    </button>
                 </form>
-            </div>
-
-            <div id="successMessage" class="hidden bg-green-500/20 border border-green-500/50 text-green-400 p-4 rounded-xl text-center">
-                <i data-lucide="check-circle" class="w-6 h-6 inline mr-2"></i>
-                Valutazione salvata con successo!
-            </div>
-        </div>
-
-        <!-- Section: Lista Giocatori -->
-        <div id="lista-giocatori" class="hidden">
-            <div class="glass-panel rounded-2xl p-6 border border-slate-700">
-                <h2 class="font-display text-xl font-bold mb-6">Lista Giocatori</h2>
-                <div id="playersList" class="space-y-2">
-                    <p class="text-slate-400 text-center py-8">Caricamento...</p>
-                </div>
-            </div>
-        </div>
-
-        <!-- Section: Storico -->
-        <div id="storico" class="hidden">
-            <div class="glass-panel rounded-2xl p-6 border border-slate-700">
-                <h2 class="font-display text-xl font-bold mb-6">Ultime Valutazioni Inserite</h2>
-                <div id="storicoList" class="space-y-3">
-                    <p class="text-slate-400 text-center py-8">Caricamento...</p>
-                </div>
             </div>
         </div>
 
@@ -243,26 +233,29 @@
         const db = firebase.firestore();
 
         let currentUser = null;
-        let tipoValutazioneCorrente = null;
+        let selectedPlayerId = null;
+        let trendChartInstance = null;
+        let radarChartInstance = null;
 
-        // Verifica autenticazione
+        // Verifica autenticazione e ruolo admin
         auth.onAuthStateChanged(async (user) => {
             if (!user) {
                 window.location.href = 'login.html';
                 return;
             }
-            currentUser = user;
             
             const userDoc = await db.collection('users').doc(user.uid).get();
-            if (userDoc.exists) {
-                const userData = userDoc.data();
-                document.getElementById('userName').textContent = userData.name;
-                document.getElementById('welcomeName').textContent = userData.name;
+            if (!userDoc.exists || userDoc.data().role !== 'admin') {
+                alert('Accesso riservato solo agli amministratori');
+                await auth.signOut();
+                window.location.href = 'login.html';
+                return;
             }
             
-            loadGiocatori();
-            loadStorico();
-            loadPlayersList();
+            currentUser = user;
+            loadStats();
+            loadPlayers();
+            loadPendingApprovals();
         });
 
         function logout() {
@@ -271,209 +264,318 @@
             });
         }
 
-        function showSection(sectionId) {
-            ['nuova-valutazione', 'lista-giocatori', 'storico'].forEach(id => {
-                document.getElementById(id).classList.add('hidden');
+        function showSection(section) {
+            ['dashboard', 'dettaglio', 'approvazioni', 'database'].forEach(s => {
+                document.getElementById(`section-${s}`).classList.add('hidden');
+                document.getElementById(`nav-${s}`).classList.remove('bg-cyan-500/20', 'text-cyan-400');
+                document.getElementById(`nav-${s}`).classList.add('bg-slate-800', 'text-slate-400');
             });
-            document.getElementById(sectionId).classList.remove('hidden');
+            
+            document.getElementById(`section-${section}`).classList.remove('hidden');
+            document.getElementById(`nav-${section}`).classList.remove('bg-slate-800', 'text-slate-400');
+            document.getElementById(`nav-${section}`).classList.add('bg-cyan-500/20', 'text-cyan-400');
         }
 
-        async function loadGiocatori() {
-            const categoria = document.getElementById('filterCategoria').value;
-            const select = document.getElementById('selectGiocatore');
+        async function loadStats() {
+            const playersSnap = await db.collection('giocatori').get();
+            document.getElementById('statTotalPlayers').textContent = playersSnap.size;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const evalsSnap = await db.collection('valutazioni')
+                .where('data', '==', today).get();
+            document.getElementById('statTodayEvals').textContent = evalsSnap.size;
+            
+            const staffSnap = await db.collection('users')
+                .where('approved', '==', true).get();
+            document.getElementById('statActiveStaff').textContent = staffSnap.size;
+            
+            const pendingSnap = await db.collection('users')
+                .where('approved', '==', false).get();
+            document.getElementById('statPending').textContent = pendingSnap.size;
+            
+            if (pendingSnap.size > 0) {
+                document.getElementById('badgeApprovazioni').textContent = pendingSnap.size;
+                document.getElementById('badgeApprovazioni').classList.remove('hidden');
+            }
+        }
+
+        async function loadPlayers() {
+            const categoria = document.getElementById('filterCat').value;
+            const ruolo = document.getElementById('filterRuolo').value;
+            const search = document.getElementById('searchPlayer').value.toLowerCase();
             
             let query = db.collection('giocatori').orderBy('cognome');
-            if (categoria) {
-                query = query.where('categoria', '==', categoria);
-            }
+            if (categoria) query = query.where('categoria', '==', categoria);
+            if (ruolo) query = query.where('ruolo', '==', ruolo);
             
             const snapshot = await query.get();
-            select.innerHTML = '<option value="">Seleziona un giocatore...</option>';
-            
-            snapshot.forEach(doc => {
-                const g = doc.data();
-                select.innerHTML += `<option value="${doc.id}">${g.cognome} ${g.nome} (${g.categoria})</option>`;
-            });
-        }
-
-        async function loadPlayersList() {
-            const snapshot = await db.collection('giocatori').orderBy('cognome').get();
-            const container = document.getElementById('playersList');
-            
-            if (snapshot.empty) {
-                container.innerHTML = '<p class="text-slate-400 text-center py-8">Nessun giocatore inserito</p>';
-                return;
-            }
-            
-            container.innerHTML = '';
-            snapshot.forEach(doc => {
-                const g = doc.data();
-                container.innerHTML += `
-                    <div class="p-4 bg-slate-800/30 rounded-xl border border-slate-700 flex justify-between items-center">
-                        <div>
-                            <div class="font-semibold text-white">${g.cognome} ${g.nome}</div>
-                            <div class="text-sm text-slate-400">${g.categoria} • ${g.ruolo}</div>
-                        </div>
-                        <span class="text-xs text-slate-500">${g.data_nascita}</span>
-                    </div>
-                `;
-            });
-        }
-
-        function setTipoValutazione(tipo) {
-            tipoValutazioneCorrente = tipo;
-            
-            ['tecnica', 'cognitiva', 'fisica', 'psicologica'].forEach(t => {
-                const btn = document.getElementById(`btn-${t}`);
-                btn.classList.remove('border-cyan-500', 'bg-cyan-500/10');
-                btn.classList.add('border-slate-600');
-            });
-            
-            const btnSelected = document.getElementById(`btn-${tipo}`);
-            btnSelected.classList.remove('border-slate-600');
-            btnSelected.classList.add('border-cyan-500', 'bg-cyan-500/10');
-            
-            document.getElementById('formContainer').classList.remove('hidden');
-            generateFields(tipo);
-        }
-
-        function generateFields(tipo) {
-            const container = document.getElementById('dynamicFields');
-            container.innerHTML = '';
-            
-            const fields = {
-                tecnica: [
-                    { name: 'controllo_1vs1', label: 'Controllo 1vs1', type: 'range', min: 1, max: 10 },
-                    { name: 'passaggio_corto', label: 'Passaggio Corto', type: 'range', min: 1, max: 10 },
-                    { name: 'passaggio_lungo', label: 'Passaggio Lungo', type: 'range', min: 1, max: 10 },
-                    { name: 'tiro', label: 'Tiro', type: 'range', min: 1, max: 10 },
-                    { name: 'dribbling', label: 'Dribbling', type: 'range', min: 1, max: 10 }
-                ],
-                cognitiva: [
-                    { name: 'tempo_decisione', label: 'Tempo Decisione (sec)', type: 'number', step: 0.1 },
-                    { name: 'decisioni_corrette', label: 'Decisioni Corrette %', type: 'number', min: 0, max: 100 },
-                    { name: 'percezione_spaziale', label: 'Percezione Spaziale', type: 'range', min: 1, max: 10 },
-                    { name: 'adattabilita', label: 'Adattabilità Tattica', type: 'range', min: 1, max: 10 }
-                ],
-                fisica: [
-                    { name: 'sprint_20m', label: 'Sprint 20m (sec)', type: 'number', step: 0.01 },
-                    { name: 'agilita', label: 'Agilità (sec)', type: 'number', step: 0.1 },
-                    { name: 'salto_verticale', label: 'Salto Verticale (cm)', type: 'number' },
-                    { name: 'resistenza', label: 'Resistenza (1-10)', type: 'range', min: 1, max: 10 }
-                ],
-                psicologica: [
-                    { name: 'resilienza', label: 'Resilienza', type: 'range', min: 1, max: 10 },
-                    { name: 'motivazione', label: 'Motivazione', type: 'range', min: 1, max: 10 },
-                    { name: 'concentrazione', label: 'Concentrazione', type: 'range', min: 1, max: 10 },
-                    { name: 'spirito_squadra', label: 'Spirito di Squadra', type: 'range', min: 1, max: 10 }
-                ]
-            };
-            
-            fields[tipo].forEach(field => {
-                const div = document.createElement('div');
-                if (field.type === 'range') {
-                    div.innerHTML = `
-                        <label class="block text-sm font-medium text-slate-300 mb-2">${field.label}</label>
-                        <div class="flex items-center gap-4">
-                            <input type="range" name="${field.name}" min="${field.min}" max="${field.max}" value="5" 
-                                class="flex-1 h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-cyan-500"
-                                oninput="this.nextElementSibling.textContent = this.value">
-                            <span class="w-8 text-center font-bold text-cyan-400">5</span>
-                        </div>
-                    `;
-                } else {
-                    div.innerHTML = `
-                        <label class="block text-sm font-medium text-slate-300 mb-2">${field.label}</label>
-                        <input type="${field.type}" name="${field.name}" step="${field.step || ''}" 
-                            class="w-full px-4 py-2 bg-slate-800/50 border border-slate-600 rounded-lg text-white focus:border-cyan-500 focus:outline-none">
-                    `;
-                }
-                container.appendChild(div);
-            });
-        }
-
-        document.getElementById('valutazioneForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const giocatoreId = document.getElementById('selectGiocatore').value;
-            if (!giocatoreId) {
-                alert('Seleziona un giocatore');
-                return;
-            }
-            
-            const formData = {
-                giocatore_id: giocatoreId,
-                allenatore_id: currentUser.uid,
-                data: document.getElementById('dataValutazione').value,
-                sessione: document.getElementById('sessione').value,
-                tipo: tipoValutazioneCorrente,
-                note: document.getElementById('note').value,
-                timestamp: firebase.firestore.FieldValue.serverTimestamp()
-            };
-            
-            const inputs = document.getElementById('dynamicFields').querySelectorAll('input');
-            inputs.forEach(input => {
-                formData[input.name] = input.type === 'number' ? parseFloat(input.value) : parseInt(input.value);
-            });
-            
-            try {
-                await db.collection('valutazioni').add(formData);
-                
-                document.getElementById('successMessage').classList.remove('hidden');
-                setTimeout(() => {
-                    document.getElementById('successMessage').classList.add('hidden');
-                    resetForm();
-                }, 3000);
-                
-                loadStorico();
-            } catch (error) {
-                alert('Errore nel salvataggio: ' + error.message);
-            }
-        });
-
-        function resetForm() {
-            document.getElementById('valutazioneForm').reset();
-            document.getElementById('formContainer').classList.add('hidden');
-            tipoValutazioneCorrente = null;
-            ['tecnica', 'cognitiva', 'fisica', 'psicologica'].forEach(t => {
-                const btn = document.getElementById(`btn-${t}`);
-                btn.classList.remove('border-cyan-500', 'bg-cyan-500/10');
-                btn.classList.add('border-slate-600');
-            });
-        }
-
-        async function loadStorico() {
-            const snapshot = await db.collection('valutazioni')
-                .where('allenatore_id', '==', currentUser.uid)
-                .orderBy('timestamp', 'desc')
-                .limit(10)
-                .get();
-            
-            const container = document.getElementById('storicoList');
-            container.innerHTML = '';
-            
-            if (snapshot.empty) {
-                container.innerHTML = '<p class="text-slate-400 text-center py-8">Nessuna valutazione inserita</p>';
-                return;
-            }
+            const grid = document.getElementById('playersGrid');
+            grid.innerHTML = '';
             
             for (const doc of snapshot.docs) {
-                const v = doc.data();
-                const playerDoc = await db.collection('giocatori').doc(v.giocatore_id).get();
-                const playerName = playerDoc.exists ? `${playerDoc.data().cognome} ${playerDoc.data().nome}` : 'Sconosciuto';
+                const p = doc.data();
+                if (search && !(`${p.nome} ${p.cognome}`.toLowerCase().includes(search))) continue;
                 
-                container.innerHTML += `
-                    <div class="p-4 bg-slate-800/30 rounded-xl border border-slate-700 flex justify-between items-center">
-                        <div>
-                            <div class="font-semibold text-white">${playerName}</div>
-                            <div class="text-sm text-slate-400 capitalize">${v.tipo} • ${v.data} • ${v.sessione}</div>
+                const evals = await db.collection('valutazioni')
+                    .where('giocatore_id', '==', doc.id)
+                    .orderBy('timestamp', 'desc')
+                    .limit(5)
+                    .get();
+                
+                let avgScore = '--';
+                if (!evals.empty) {
+                    let total = 0, count = 0;
+                    evals.forEach(e => {
+                        const data = e.data();
+                        Object.keys(data).forEach(key => {
+                            if (typeof data[key] === 'number' && key !== 'timestamp') {
+                                total += data[key];
+                                count++;
+                            }
+                        });
+                    });
+                    avgScore = count > 0 ? (total / count).toFixed(1) : '--';
+                }
+                
+                grid.innerHTML += `
+                    <div onclick="showPlayerDetail('${doc.id}')" class="glass-panel p-6 rounded-2xl border border-slate-700 hover:border-cyan-500/50 cursor-pointer transition-all group">
+                        <div class="flex justify-between items-start mb-4">
+                            <div>
+                                <h3 class="font-bold text-lg group-hover:text-cyan-400 transition-colors">${p.cognome} ${p.nome}</h3>
+                                <p class="text-sm text-slate-400">${p.categoria} • ${p.ruolo}</p>
+                            </div>
+                            <div class="text-2xl font-bold text-cyan-400 font-display">${avgScore}</div>
                         </div>
-                        <span class="px-3 py-1 rounded-full text-xs bg-cyan-500/20 text-cyan-400">
-                            ${new Date(v.timestamp?.toDate()).toLocaleDateString()}
-                        </span>
+                        <div class="flex gap-2 text-xs">
+                            <span class="px-2 py-1 bg-slate-800 rounded">${p.data_nascita}</span>
+                            <span class="px-2 py-1 bg-slate-800 rounded">${evals.size} valutazioni</span>
+                        </div>
                     </div>
                 `;
             }
+        }
+
+        async function showPlayerDetail(playerId) {
+            selectedPlayerId = playerId;
+            showSection('dettaglio');
+            
+            const playerDoc = await db.collection('giocatori').doc(playerId).get();
+            const p = playerDoc.data();
+            
+            document.getElementById('detailName').textContent = `${p.cognome} ${p.nome}`;
+            document.getElementById('detailInfo').textContent = `${p.categoria} • ${p.ruolo} • Nato il ${p.data_nascita}`;
+            
+            const evals = await db.collection('valutazioni')
+                .where('giocatore_id', '==', playerId)
+                .orderBy('timestamp', 'desc')
+                .get();
+            
+            let totalScore = 0, count = 0;
+            const history = [];
+            const skillCategories = { tecnica: [], cognitiva: [], fisica: [], psicologica: [] };
+            
+            evals.forEach(doc => {
+                const v = doc.data();
+                history.push(v);
+                
+                if (skillCategories[v.tipo]) {
+                    let sum = 0, num = 0;
+                    Object.keys(v).forEach(key => {
+                        if (typeof v[key] === 'number' && !['timestamp', 'giocatore_id'].includes(key)) {
+                            sum += v[key];
+                            num++;
+                        }
+                    });
+                    if (num > 0) skillCategories[v.tipo].push(sum / num);
+                }
+            });
+            
+            const radarData = [
+                skillCategories.tecnica.length > 0 ? 
+                    skillCategories.tecnica.reduce((a,b) => a+b) / skillCategories.tecnica.length : 0,
+                skillCategories.cognitiva.length > 0 ? 
+                    skillCategories.cognitiva.reduce((a,b) => a+b) / skillCategories.cognitiva.length : 0,
+                skillCategories.fisica.length > 0 ? 
+                    skillCategories.fisica.reduce((a,b) => a+b) / skillCategories.fisica.length : 0,
+                skillCategories.psicologica.length > 0 ? 
+                    skillCategories.psicologica.reduce((a,b) => a+b) / skillCategories.psicologica.length : 0
+            ];
+            
+            const globalAvg = radarData.reduce((a,b) => a+b) / radarData.filter(x => x > 0).length || 0;
+            document.getElementById('detailScore').textContent = globalAvg > 0 ? globalAvg.toFixed(1) : '--';
+            
+            const histContainer = document.getElementById('detailHistory');
+            histContainer.innerHTML = '';
+            history.slice(0, 20).forEach(h => {
+                histContainer.innerHTML += `
+                    <div class="p-3 bg-slate-800/30 rounded-lg border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <span class="capitalize font-semibold text-cyan-400">${h.tipo}</span>
+                            <span class="text-slate-400 text-sm ml-2">${h.data} • ${h.sessione}</span>
+                        </div>
+                        <span class="text-xs text-slate-500">${new Date(h.timestamp?.toDate()).toLocaleDateString()}</span>
+                    </div>
+                `;
+            });
+            
+            createCharts(radarData, history);
+        }
+
+        function createCharts(radarData, history) {
+            const radarCtx = document.getElementById('radarChart').getContext('2d');
+            if (radarChartInstance) radarChartInstance.destroy();
+            
+            radarChartInstance = new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Tecnica', 'Cognitiva', 'Fisica', 'Psicologica'],
+                    datasets: [{
+                        label: 'Media Competenze',
+                        data: radarData,
+                        backgroundColor: 'rgba(0, 245, 212, 0.2)',
+                        borderColor: '#00f5d4',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 10,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            angleLines: { color: 'rgba(255,255,255,0.1)' },
+                            pointLabels: { color: 'white' }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+            
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            if (trendChartInstance) trendChartInstance.destroy();
+            
+            const recentScores = history.slice(0, 6).reverse().map(h => {
+                let sum = 0, count = 0;
+                Object.keys(h).forEach(key => {
+                    if (typeof h[key] === 'number' && !['timestamp', 'giocatore_id'].includes(key)) {
+                        sum += h[key];
+                        count++;
+                    }
+                });
+                return count > 0 ? (sum / count).toFixed(1) : 0;
+            });
+            
+            trendChartInstance = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: recentScores.map((_, i) => `Val ${i+1}`),
+                    datasets: [{
+                        label: 'Andamento',
+                        data: recentScores,
+                        borderColor: '#00bbf9',
+                        backgroundColor: 'rgba(0, 187, 249, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: { beginAtZero: true, max: 10, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        async function loadPendingApprovals() {
+            const snapshot = await db.collection('users')
+                .where('approved', '==', false)
+                .get();
+            
+            const container = document.getElementById('pendingApprovals');
+            container.innerHTML = '';
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<p class="text-slate-400 text-center py-8">Nessuna richiesta pendente</p>';
+                return;
+            }
+            
+            snapshot.forEach(doc => {
+                const u = doc.data();
+                container.innerHTML += `
+                    <div class="glass-panel p-6 rounded-2xl border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-lg">${u.name}</div>
+                            <div class="text-sm text-slate-400">${u.email} • ${u.role}</div>
+                            <div class="text-xs text-slate-500 mt-1">Registrato il ${new Date(u.createdAt?.toDate()).toLocaleDateString()}</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="approveUser('${doc.id}', true)" 
+                                class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors">
+                                Approva
+                            </button>
+                            <button onclick="approveUser('${doc.id}', false)" 
+                                class="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors">
+                                Rifiuta
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function approveUser(userId, approve) {
+            if (approve) {
+                await db.collection('users').doc(userId).update({ approved: true });
+            } else {
+                await db.collection('users').doc(userId).delete();
+            }
+            loadPendingApprovals();
+            loadStats();
+        }
+
+        document.getElementById('addPlayerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const newPlayer = {
+                nome: document.getElementById('newNome').value,
+                cognome: document.getElementById('newCognome').value,
+                data_nascita: document.getElementById('newDataNascita').value,
+                categoria: document.getElementById('newCategoria').value,
+                ruolo: document.getElementById('newRuolo').value,
+                created_at: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            await db.collection('giocatori').add(newPlayer);
+            alert('Giocatore aggiunto con successo!');
+            e.target.reset();
+            loadStats();
+            loadPlayers();
+        });
+
+        async function exportData() {
+            const players = await db.collection('giocatori').get();
+            const evals = await db.collection('valutazioni').get();
+            
+            let csv = 'Tipo,ID,Nome,Cognome,Categoria,Ruolo,Data\n';
+            
+            players.forEach(doc => {
+                const p = doc.data();
+                csv += `Giocatore,${doc.id},${p.nome},${p.cognome},${p.categoria},${p.ruolo},${p.data_nascita}\n`;
+            });
+            
+            evals.forEach(doc => {
+                const v = doc.data();
+                csv += `Valutazione,${doc.id},${v.giocatore_id},${v.tipo},${v.data},${v.sessione},${v.note || ''}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sincro_export_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
         }
 
         lucide.createIcons();
