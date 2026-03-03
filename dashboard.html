@@ -301,98 +301,97 @@
 
         // 🔧 FUNZIONE CORRETTA - Senza orderBy che richiede indice
         async function loadPlayers() {
-            const categoria = document.getElementById('filterCat').value;
-            const ruolo = document.getElementById('filterRuolo').value;
-            const search = document.getElementById('searchPlayer').value.toLowerCase();
-            
-            const grid = document.getElementById('playersGrid');
-            grid.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-400">Caricamento...</div>';
-            
-            try {
-                // ⚠️ NESSUN .orderBy() - evita l'errore di indice Firebase!
-                const snapshot = await db.collection('giocatori').get();
-                
-                let players = [];
-                snapshot.forEach(doc => {
-                    players.push({ id: doc.id, ...doc.data() });
-                });
-                
-                // Ordina in memoria con JavaScript
-                players.sort((a, b) => {
-                    const cognomeA = (a.cognome || '').toLowerCase();
-                    const cognomeB = (b.cognome || '').toLowerCase();
-                    if (cognomeA < cognomeB) return -1;
-                    if (cognomeA > cognomeB) return 1;
-                    const nomeA = (a.nome || '').toLowerCase();
-                    const nomeB = (b.nome || '').toLowerCase();
-                    return nomeA.localeCompare(nomeB);
-                });
-                
-                // Applica filtri
-                let filtered = players.filter(p => {
-                    if (categoria && p.categoria !== categoria) return false;
-                    if (ruolo && p.ruolo !== ruolo) return false;
-                    if (search) {
-                        const fullName = `${p.nome || ''} ${p.cognome || ''}`.toLowerCase();
-                        if (!fullName.includes(search)) return false;
-                    }
-                    return true;
-                });
-                
-                grid.innerHTML = '';
-                
-                if (filtered.length === 0) {
-                    grid.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-500">Nessun giocatore trovato</div>';
-                    return;
-                }
-                
-                for (const player of filtered) {
-                    let avgScore = '--';
-                    try {
-                        const evals = await db.collection('valutazioni')
-                            .where('giocatore_id', '==', player.id)
-                            .limit(5)
-                            .get();
-                        
-                        if (!evals.empty) {
-                            let total = 0, count = 0;
-                            evals.forEach(e => {
-                                const data = e.data();
-                                Object.keys(data).forEach(key => {
-                                    if (typeof data[key] === 'number' && key !== 'timestamp') {
-                                        total += data[key];
-                                        count++;
-                                    }
-                                });
-                            });
-                            avgScore = count > 0 ? (total / count).toFixed(1) : '--';
-                        }
-                    } catch (e) {
-                        console.log('Errore valutazioni per', player.id);
-                    }
-                    
-                    grid.innerHTML += `
-                        <div onclick="showPlayerDetail('${player.id}')" class="glass-panel p-6 rounded-2xl border border-slate-700 hover:border-cyan-500/50 cursor-pointer transition-all group">
-                            <div class="flex justify-between items-start mb-4">
-                                <div>
-                                    <h3 class="font-bold text-lg group-hover:text-cyan-400 transition-colors">${player.cognome || 'N/D'} ${player.nome || 'N/D'}</h3>
-                                    <p class="text-sm text-slate-400">${player.categoria || 'N/D'} • ${player.ruolo || 'N/D'}</p>
-                                </div>
-                                <div class="text-2xl font-bold text-cyan-400 font-display">${avgScore}</div>
-                            </div>
-                            <div class="flex gap-2 text-xs">
-                                <span class="px-2 py-1 bg-slate-800 rounded">${player.data_nascita || 'N/D'}</span>
-                            </div>
-                        </div>
-                    `;
-                }
-                
-            } catch (error) {
-                console.error('Errore:', error);
-                grid.innerHTML = '<div class="col-span-3 text-center py-8 text-red-400">Errore caricamento: ' + error.message + '</div>';
+    const categoria = document.getElementById('filterCat').value;
+    const ruolo = document.getElementById('filterRuolo').value;
+    const search = document.getElementById('searchPlayer').value.toLowerCase();
+    
+    const grid = document.getElementById('playersGrid');
+    grid.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-400">Caricamento...</div>';
+    
+    try {
+        // ⚠️ NESSUN .orderBy() - evita l'errore di indice!
+        const snapshot = await db.collection('giocatori').get();
+        
+        let players = [];
+        snapshot.forEach(doc => {
+            players.push({ id: doc.id, ...doc.data() });
+        });
+        
+        // Ordina in memoria con JavaScript
+        players.sort((a, b) => {
+            const cognomeA = (a.cognome || '').toLowerCase();
+            const cognomeB = (b.cognome || '').toLowerCase();
+            if (cognomeA < cognomeB) return -1;
+            if (cognomeA > cognomeB) return 1;
+            const nomeA = (a.nome || '').toLowerCase();
+            const nomeB = (b.nome || '').toLowerCase();
+            return nomeA.localeCompare(nomeB);
+        });
+        
+        // Applica filtri
+        let filtered = players.filter(p => {
+            if (categoria && p.categoria !== categoria) return false;
+            if (ruolo && p.ruolo !== ruolo) return false;
+            if (search) {
+                const fullName = `${p.nome || ''} ${p.cognome || ''}`.toLowerCase();
+                if (!fullName.includes(search)) return false;
             }
+            return true;
+        });
+        
+        grid.innerHTML = '';
+        
+        if (filtered.length === 0) {
+            grid.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-500">Nessun giocatore trovato</div>';
+            return;
         }
-
+        
+        for (const player of filtered) {
+            let avgScore = '--';
+            try {
+                const evals = await db.collection('valutazioni')
+                    .where('giocatore_id', '==', player.id)
+                    .limit(5)
+                    .get();
+                
+                if (!evals.empty) {
+                    let total = 0, count = 0;
+                    evals.forEach(e => {
+                        const data = e.data();
+                        Object.keys(data).forEach(key => {
+                            if (typeof data[key] === 'number' && key !== 'timestamp') {
+                                total += data[key];
+                                count++;
+                            }
+                        });
+                    });
+                    avgScore = count > 0 ? (total / count).toFixed(1) : '--';
+                }
+            } catch (e) {
+                console.log('Errore valutazioni per', player.id);
+            }
+            
+            grid.innerHTML += `
+                <div onclick="showPlayerDetail('${player.id}')" class="glass-panel p-6 rounded-2xl border border-slate-700 hover:border-cyan-500/50 cursor-pointer transition-all group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-bold text-lg group-hover:text-cyan-400 transition-colors">${player.cognome || 'N/D'} ${player.nome || 'N/D'}</h3>
+                            <p class="text-sm text-slate-400">${player.categoria || 'N/D'} • ${player.ruolo || 'N/D'}</p>
+                        </div>
+                        <div class="text-2xl font-bold text-cyan-400 font-display">${avgScore}</div>
+                    </div>
+                    <div class="flex gap-2 text-xs">
+                        <span class="px-2 py-1 bg-slate-800 rounded">${player.data_nascita || 'N/D'}</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+    } catch (error) {
+        console.error('Errore:', error);
+        grid.innerHTML = '<div class="col-span-3 text-center py-8 text-red-400">Errore caricamento: ' + error.message + '</div>';
+    }
+}
         async function showPlayerDetail(playerId) {
             selectedPlayerId = playerId;
             showSection('dettaglio');
