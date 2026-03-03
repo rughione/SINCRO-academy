@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin - S.I.N.C.R.O.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+    
+    <nav class="glass-panel border-b border-slate-700/50 p-4">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <h1 class="text-xl font-bold">S.I.N.C.R.O. ADMIN</h1>
+            <button onclick="logout()" class="text-red-400">Logout</button>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto p-4">
+        
+        <!-- Stats -->
+        <div class="grid grid-cols-4 gap-4 mb-6">
+            <div class="glass-panel p-4 rounded-xl">
+                <div class="text-slate-400 text-sm">Totale Giocatori</div>
+                <div class="text-2xl font-bold" id="statTotalPlayers">0</div>
+            </div>
+        </div>
+
+        <!-- Filters -->
+        <div class="glass-panel p-4 rounded-xl mb-6 flex gap-4">
+            <select id="filterCat" onchange="loadPlayers()" class="bg-slate-800 text-white p-2 rounded">
+                <option value="">Tutte le categorie</option>
+                <option value="E1">Esordienti 1°</option>
+                <option value="E2">Esordienti 2°</option>
+                <option value="G1">Giovanissimi 1°</option>
+            </select>
+            <input type="text" id="searchPlayer" placeholder="Cerca..." onkeyup="loadPlayers()" class="bg-slate-800 text-white p-2 rounded flex-1">
+        </div>
+
+        <!-- Players Grid -->
+        <div id="playersGrid" class="grid grid-cols-3 gap-4">
+            <div class="col-span-3 text-center py-8 text-slate-400">Caricamento...</div>
+        </div>
+
+    </div>
+
+    <script>
+        // Firebase config
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlksSPuBgbYgzZmtUk3jYJMMtXEBCgM94",
+            authDomain: "sincro-academy.firebaseapp.com",
+            projectId: "sincro-academy",
+            storageBucket: "sincro-academy.firebasestorage.app",
+            messagingSenderId: "139698272933",
+            appId: "1:139698272933:web:c4307e00b69757766beb4c"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (!userDoc.exists || userDoc.data().role !== 'admin') {
+                await auth.signOut();
+                window.location.href = 'login.html';
+                return;
+            }
+            loadStats();
+            loadPlayers();
+        });
+
+        function logout() {
+            auth.signOut().then(() => window.location.href = 'login.html');
+        }
+
+        async function loadStats() {
+            const snap = await db.collection('giocatori').get();
+            document.getElementById('statTotalPlayers').textContent = snap.size;
+        }
+
+        // 🔧 FUNZIONE CORRETTA - Senza orderBy!
+        async function loadPlayers() {
+            const categoria = document.getElementById('filterCat').value;
+            const search = document.getElementById('searchPlayer').value.toLowerCase();
+            const grid = document.getElementById('playersGrid');
+            
+            grid.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-400">Caricamento...</div>';
+            
+            try {
+                const snapshot = await db.collection('giocatori').get();
+                let players = [];
+                snapshot.forEach(doc => players.push({id: doc.id, ...doc.data()}));
+                
+                // Ordina in memoria
+                players.sort((a, b) => (a.cognome || '').localeCompare(b.cognome || ''));
+                
+                // Filtra
+                let filtered = players.filter(p => {
+                    if (categoria && p.categoria !== categoria) return false;
+                    if (search && !(`${p.nome} ${p.cognome}`.toLowerCase().includes(search))) return false;
+                    return true;
+                });
+                
+                grid.innerHTML = '';
+                
+                if (filtered.length === 0) {
+                    grid.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-500">Nessun giocatore trovato</div>';
+                    return;
+                }
+                
+                filtered.forEach(player => {
+                    grid.innerHTML += `
+                        <div class="glass-panel p-4 rounded-xl border border-slate-700">
+                            <h3 class="font-bold text-lg">${player.cognome || 'N/D'} ${player.nome || 'N/D'}</h3>
+                            <p class="text-sm text-slate-400">${player.categoria || 'N/D'}</p>
+                            <p class="text-xs text-slate-500 mt-2">${player.data_nascita || 'N/D'}</p>
+                        </div>
+                    `;
+                });
+                
+            } catch (error) {
+                grid.innerHTML = `<div class="col-span-3 text-center py-8 text-red-400">Errore: ${error.message}</div>`;
+            }
+        }
+        
+        lucide.createIcons();
+    </script>
+</body>
+</html>
