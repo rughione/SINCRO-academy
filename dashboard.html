@@ -27,6 +27,20 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
+        
+        .loading-spinner {
+            border: 3px solid rgba(255,255,255,0.1);
+            border-radius: 50%;
+            border-top: 3px solid #00f5d4;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen">
@@ -42,12 +56,12 @@
                     <span class="font-display font-bold text-xl">S.I.N.C.R.O. <span class="text-cyan-400">ADMIN</span></span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button onclick="showSection('approvazioni')" class="relative p-2 text-slate-400 hover:text-white">
+                    <button onclick="showSection('approvazioni')" class="relative p-2 text-slate-400 hover:text-white transition-colors">
                         <i data-lucide="bell" class="w-5 h-5"></i>
                         <span id="badgeApprovazioni" class="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center hidden">0</span>
                     </button>
                     <span class="text-sm text-slate-400">Amministratore</span>
-                    <button onclick="logout()" class="text-red-400 hover:text-red-300 text-sm flex items-center gap-1">
+                    <button onclick="logout()" class="text-red-400 hover:text-red-300 text-sm flex items-center gap-1 transition-colors">
                         <i data-lucide="log-out" class="w-4 h-4"></i>
                     </button>
                 </div>
@@ -59,7 +73,7 @@
         
         <!-- Stats Overview -->
         <div class="grid md:grid-cols-4 gap-6 mb-8">
-            <div class="glass-panel p-6 rounded-2xl border border-cyan-500/30">
+            <div class="glass-panel p-6 rounded-2xl border border-cyan-500/30 hover:border-cyan-500/50 transition-all">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-slate-400 text-sm">Totale Giocatori</span>
                     <i data-lucide="users" class="w-5 h-5 text-cyan-400"></i>
@@ -67,7 +81,7 @@
                 <div class="text-3xl font-bold font-display" id="statTotalPlayers">0</div>
             </div>
             
-            <div class="glass-panel p-6 rounded-2xl border border-purple-500/30">
+            <div class="glass-panel p-6 rounded-2xl border border-purple-500/30 hover:border-purple-500/50 transition-all">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-slate-400 text-sm">Valutazioni Oggi</span>
                     <i data-lucide="clipboard-check" class="w-5 h-5 text-purple-400"></i>
@@ -75,7 +89,7 @@
                 <div class="text-3xl font-bold font-display" id="statTodayEvals">0</div>
             </div>
             
-            <div class="glass-panel p-6 rounded-2xl border border-green-500/30">
+            <div class="glass-panel p-6 rounded-2xl border border-green-500/30 hover:border-green-500/50 transition-all">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-slate-400 text-sm">Staff Attivo</span>
                     <i data-lucide="user-check" class="w-5 h-5 text-green-400"></i>
@@ -83,7 +97,7 @@
                 <div class="text-3xl font-bold font-display" id="statActiveStaff">0</div>
             </div>
             
-            <div class="glass-panel p-6 rounded-2xl border border-yellow-500/30">
+            <div class="glass-panel p-6 rounded-2xl border border-yellow-500/30 hover:border-yellow-500/50 transition-all">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-slate-400 text-sm">In Attesa</span>
                     <i data-lucide="clock" class="w-5 h-5 text-yellow-400"></i>
@@ -94,16 +108,16 @@
 
         <!-- Navigation Tabs -->
         <div class="flex gap-2 mb-8 overflow-x-auto pb-2">
-            <button onclick="showSection('dashboard')" id="nav-dashboard" class="px-6 py-3 rounded-full bg-cyan-500/20 text-cyan-400 font-semibold whitespace-nowrap">
+            <button onclick="showSection('dashboard')" id="nav-dashboard" class="px-6 py-3 rounded-full bg-cyan-500/20 text-cyan-400 font-semibold whitespace-nowrap transition-all hover:bg-cyan-500/30">
                 Dashboard Giocatori
             </button>
-            <button onclick="showSection('dettaglio')" id="nav-dettaglio" class="px-6 py-3 rounded-full bg-slate-800 text-slate-400 font-semibold whitespace-nowrap hover:text-white">
+            <button onclick="showSection('dettaglio')" id="nav-dettaglio" class="px-6 py-3 rounded-full bg-slate-800 text-slate-400 font-semibold whitespace-nowrap hover:text-white hover:bg-slate-700 transition-all">
                 Analisi Dettaglio
             </button>
-            <button onclick="showSection('approvazioni')" id="nav-approvazioni" class="px-6 py-3 rounded-full bg-slate-800 text-slate-400 font-semibold whitespace-nowrap hover:text-white">
+            <button onclick="showSection('approvazioni')" id="nav-approvazioni" class="px-6 py-3 rounded-full bg-slate-800 text-slate-400 font-semibold whitespace-nowrap hover:text-white hover:bg-slate-700 transition-all">
                 Approvazioni Staff
             </button>
-            <button onclick="showSection('database')" id="nav-database" class="px-6 py-3 rounded-full bg-slate-800 text-slate-400 font-semibold whitespace-nowrap hover:text-white">
+            <button onclick="showSection('database')" id="nav-database" class="px-6 py-3 rounded-full bg-slate-800 text-slate-400 font-semibold whitespace-nowrap hover:text-white hover:bg-slate-700 transition-all">
                 Gestione Database
             </button>
         </div>
@@ -113,31 +127,54 @@
             
             <!-- Filters -->
             <div class="glass-panel p-4 rounded-2xl border border-slate-700 flex gap-4 flex-wrap">
-                <select id="filterCat" onchange="loadPlayers()" class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600">
+                <select id="filterCat" onchange="loadPlayers()" class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600 focus:border-cyan-500 focus:outline-none transition-colors">
                     <option value="">Tutte le categorie</option>
                     <option value="E1">Esordienti 1°</option>
                     <option value="E2">Esordienti 2°</option>
                     <option value="G1">Giovanissimi 1°</option>
                 </select>
-                <select id="filterRuolo" onchange="loadPlayers()" class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600">
+                <select id="filterRuolo" onchange="loadPlayers()" class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600 focus:border-cyan-500 focus:outline-none transition-colors">
                     <option value="">Tutti i ruoli</option>
                     <option value="Portiere">Portiere</option>
                     <option value="Difensore">Difensore</option>
                     <option value="Centrocampista">Centrocampista</option>
                     <option value="Attaccante">Attaccante</option>
                 </select>
-                <input type="text" id="searchPlayer" placeholder="Cerca giocatore..." onkeyup="loadPlayers()"
-                    class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600 flex-1 min-w-[200px]">
+                <div class="relative flex-1 min-w-[200px]">
+                    <i data-lucide="search" class="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-slate-400"></i>
+                    <input type="text" id="searchPlayer" placeholder="Cerca giocatore..." onkeyup="loadPlayers()"
+                        class="pl-10 pr-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600 w-full focus:border-cyan-500 focus:outline-none transition-colors">
+                </div>
+                <button onclick="resetFilters()" class="px-4 py-2 text-slate-400 hover:text-white transition-colors">
+                    <i data-lucide="x" class="w-4 h-4"></i>
+                </button>
+            </div>
+
+            <!-- Loading State -->
+            <div id="loadingState" class="hidden flex justify-center items-center py-12">
+                <div class="loading-spinner"></div>
             </div>
 
             <!-- Players Grid -->
             <div id="playersGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
                 <!-- Popolato via JS -->
             </div>
+            
+            <!-- Empty State -->
+            <div id="emptyState" class="hidden text-center py-12">
+                <i data-lucide="users" class="w-16 h-16 text-slate-600 mx-auto mb-4"></i>
+                <p class="text-slate-400 text-lg">Nessun giocatore trovato</p>
+                <p class="text-slate-500 text-sm mt-2">Prova a modificare i filtri o aggiungi un nuovo giocatore</p>
+            </div>
         </div>
 
         <!-- SECTION: Dettaglio Giocatore -->
         <div id="section-dettaglio" class="hidden space-y-6">
+            <button onclick="showSection('dashboard')" class="flex items-center gap-2 text-slate-400 hover:text-white mb-4 transition-colors">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                Torna alla Dashboard
+            </button>
+            
             <div class="glass-panel rounded-2xl p-6 border border-slate-700">
                 <div class="flex justify-between items-start mb-6">
                     <div>
@@ -182,8 +219,8 @@
         <div id="section-database" class="hidden space-y-6">
             <div class="flex justify-between items-center">
                 <h2 class="font-display text-2xl font-bold">Gestione Database</h2>
-                <button onclick="exportData()" class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors">
-                    <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+                <button onclick="exportData()" class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors flex items-center gap-2">
+                    <i data-lucide="download" class="w-4 h-4"></i>
                     Esporta CSV
                 </button>
             </div>
@@ -191,16 +228,16 @@
             <div class="glass-panel p-6 rounded-2xl border border-slate-700">
                 <h3 class="font-semibold mb-4">Aggiungi Nuovo Giocatore</h3>
                 <form id="addPlayerForm" class="grid md:grid-cols-2 gap-4">
-                    <input type="text" id="newNome" placeholder="Nome" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
-                    <input type="text" id="newCognome" placeholder="Cognome" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
-                    <input type="date" id="newDataNascita" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
-                    <select id="newCategoria" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
+                    <input type="text" id="newNome" placeholder="Nome" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white focus:border-cyan-500 focus:outline-none transition-colors">
+                    <input type="text" id="newCognome" placeholder="Cognome" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white focus:border-cyan-500 focus:outline-none transition-colors">
+                    <input type="date" id="newDataNascita" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white focus:border-cyan-500 focus:outline-none transition-colors">
+                    <select id="newCategoria" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white focus:border-cyan-500 focus:outline-none transition-colors">
                         <option value="">Categoria</option>
                         <option value="E1">Esordienti 1°</option>
                         <option value="E2">Esordienti 2°</option>
                         <option value="G1">Giovanissimi 1°</option>
                     </select>
-                    <select id="newRuolo" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
+                    <select id="newRuolo" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white focus:border-cyan-500 focus:outline-none transition-colors">
                         <option value="">Ruolo</option>
                         <option value="Portiere">Portiere</option>
                         <option value="Difensore">Difensore</option>
@@ -236,6 +273,7 @@
         let selectedPlayerId = null;
         let trendChartInstance = null;
         let radarChartInstance = null;
+        let allPlayers = []; // Cache per i giocatori
 
         // Verifica autenticazione e ruolo admin
         auth.onAuthStateChanged(async (user) => {
@@ -244,18 +282,23 @@
                 return;
             }
             
-            const userDoc = await db.collection('users').doc(user.uid).get();
-            if (!userDoc.exists || userDoc.data().role !== 'admin') {
-                alert('Accesso riservato solo agli amministratori');
-                await auth.signOut();
-                window.location.href = 'login.html';
-                return;
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                if (!userDoc.exists || userDoc.data().role !== 'admin') {
+                    alert('Accesso riservato solo agli amministratori');
+                    await auth.signOut();
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                currentUser = user;
+                await loadStats();
+                await loadPlayers();
+                await loadPendingApprovals();
+            } catch (error) {
+                console.error('Errore autenticazione:', error);
+                alert('Errore di autenticazione. Riprova.');
             }
-            
-            currentUser = user;
-            loadStats();
-            loadPlayers();
-            loadPendingApprovals();
         });
 
         function logout() {
@@ -274,182 +317,296 @@
             document.getElementById(`section-${section}`).classList.remove('hidden');
             document.getElementById(`nav-${section}`).classList.remove('bg-slate-800', 'text-slate-400');
             document.getElementById(`nav-${section}`).classList.add('bg-cyan-500/20', 'text-cyan-400');
+            
+            // Refresh icon quando cambia sezione
+            lucide.createIcons();
         }
 
         async function loadStats() {
-            const playersSnap = await db.collection('giocatori').get();
-            document.getElementById('statTotalPlayers').textContent = playersSnap.size;
-            
-            const today = new Date().toISOString().split('T')[0];
-            const evalsSnap = await db.collection('valutazioni')
-                .where('data', '==', today).get();
-            document.getElementById('statTodayEvals').textContent = evalsSnap.size;
-            
-            const staffSnap = await db.collection('users')
-                .where('approved', '==', true).get();
-            document.getElementById('statActiveStaff').textContent = staffSnap.size;
-            
-            const pendingSnap = await db.collection('users')
-                .where('approved', '==', false).get();
-            document.getElementById('statPending').textContent = pendingSnap.size;
-            
-            if (pendingSnap.size > 0) {
-                document.getElementById('badgeApprovazioni').textContent = pendingSnap.size;
-                document.getElementById('badgeApprovazioni').classList.remove('hidden');
+            try {
+                const playersSnap = await db.collection('giocatori').get();
+                document.getElementById('statTotalPlayers').textContent = playersSnap.size;
+                
+                const today = new Date().toISOString().split('T')[0];
+                const evalsSnap = await db.collection('valutazioni')
+                    .where('data', '==', today).get();
+                document.getElementById('statTodayEvals').textContent = evalsSnap.size;
+                
+                const staffSnap = await db.collection('users')
+                    .where('approved', '==', true).get();
+                document.getElementById('statActiveStaff').textContent = staffSnap.size;
+                
+                const pendingSnap = await db.collection('users')
+                    .where('approved', '==', false).get();
+                document.getElementById('statPending').textContent = pendingSnap.size;
+                
+                const badge = document.getElementById('badgeApprovazioni');
+                if (pendingSnap.size > 0) {
+                    badge.textContent = pendingSnap.size;
+                    badge.classList.remove('hidden');
+                } else {
+                    badge.classList.add('hidden');
+                }
+            } catch (error) {
+                console.error('Errore caricamento statistiche:', error);
             }
         }
 
-      async function loadPlayers() {
-    const categoria = document.getElementById('filterCat').value;
-    const ruolo = document.getElementById('filterRuolo').value;
-    const search = document.getElementById('searchPlayer').value.toLowerCase();
-    
-    // Se nessun filtro, carica tutti
-    let query = db.collection('giocatori').orderBy('cognome');
-    
-    try {
-        const snapshot = await query.get();
-        const grid = document.getElementById('playersGrid');
-        grid.innerHTML = '';
-        
-        if (snapshot.empty) {
-            grid.innerHTML = '<p class="text-slate-400 text-center py-8 col-span-3">Nessun giocatore trovato</p>';
-            return;
-        }
-        
-        let count = 0;
-        
-        for (const doc of snapshot.docs) {
-            const p = doc.data();
+        async function loadPlayers() {
+            const categoria = document.getElementById('filterCat').value;
+            const ruolo = document.getElementById('filterRuolo').value;
+            const search = document.getElementById('searchPlayer').value.toLowerCase().trim();
             
-            // Filtra per categoria se selezionata
-            if (categoria && p.categoria !== categoria) continue;
+            const grid = document.getElementById('playersGrid');
+            const loadingState = document.getElementById('loadingState');
+            const emptyState = document.getElementById('emptyState');
             
-            // Filtra per ruolo se selezionato
-            if (ruolo && p.ruolo !== ruolo) continue;
+            // Mostra loading
+            grid.innerHTML = '';
+            loadingState.classList.remove('hidden');
+            emptyState.classList.add('hidden');
             
-            // Filtra per ricerca testuale
-            if (search && !(`${p.nome} ${p.cognome}`.toLowerCase().includes(search))) continue;
-            
-            count++;
-            
-            const evals = await db.collection('valutazioni')
-                .where('giocatore_id', '==', doc.id)
-                .orderBy('timestamp', 'desc')
-                .limit(5)
-                .get();
-            
-            let avgScore = '--';
-            if (!evals.empty) {
-                let total = 0, count = 0;
-                evals.forEach(e => {
-                    const data = e.data();
-                    Object.keys(data).forEach(key => {
-                        if (typeof data[key] === 'number' && key !== 'timestamp') {
-                            total += data[key];
-                            count++;
-                        }
-                    });
+            try {
+                // Se non abbiamo ancora caricato i giocatori, caricali tutti
+                if (allPlayers.length === 0) {
+                    const snapshot = await db.collection('giocatori')
+                        .orderBy('cognome')
+                        .orderBy('nome')
+                        .get();
+                    
+                    allPlayers = snapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                }
+                
+                // Filtra i giocatori in memoria (più efficiente)
+                let filteredPlayers = allPlayers.filter(p => {
+                    // Filtra per categoria
+                    if (categoria && p.categoria !== categoria) return false;
+                    
+                    // Filtra per ruolo
+                    if (ruolo && p.ruolo !== ruolo) return false;
+                    
+                    // Filtra per ricerca testuale
+                    if (search) {
+                        const fullName = `${p.nome || ''} ${p.cognome || ''}`.toLowerCase();
+                        const reverseName = `${p.cognome || ''} ${p.nome || ''}`.toLowerCase();
+                        if (!fullName.includes(search) && !reverseName.includes(search)) return false;
+                    }
+                    
+                    return true;
                 });
-                avgScore = count > 0 ? (total / count).toFixed(1) : '--';
+                
+                loadingState.classList.add('hidden');
+                
+                if (filteredPlayers.length === 0) {
+                    emptyState.classList.remove('hidden');
+                    return;
+                }
+                
+                // Carica le valutazioni per ogni giocatore filtrato
+                for (const player of filteredPlayers) {
+                    try {
+                        const evals = await db.collection('valutazioni')
+                            .where('giocatore_id', '==', player.id)
+                            .orderBy('timestamp', 'desc')
+                            .limit(5)
+                            .get();
+                        
+                        let avgScore = '--';
+                        let evalCount = 0;
+                        
+                        if (!evals.empty) {
+                            let total = 0, count = 0;
+                            evals.forEach(e => {
+                                const data = e.data();
+                                Object.keys(data).forEach(key => {
+                                    if (typeof data[key] === 'number' && key !== 'timestamp') {
+                                        total += data[key];
+                                        count++;
+                                    }
+                                });
+                            });
+                            evalCount = evals.size;
+                            avgScore = count > 0 ? (total / count).toFixed(1) : '--';
+                        }
+                        
+                        const card = document.createElement('div');
+                        card.className = 'glass-panel p-6 rounded-2xl border border-slate-700 hover:border-cyan-500/50 cursor-pointer transition-all group hover:transform hover:scale-[1.02]';
+                        card.onclick = () => showPlayerDetail(player.id);
+                        
+                        card.innerHTML = `
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-bold text-lg group-hover:text-cyan-400 transition-colors">${player.cognome || 'N/D'} ${player.nome || 'N/D'}</h3>
+                                    <p class="text-sm text-slate-400">${player.categoria || 'N/D'} • ${player.ruolo || 'N/D'}</p>
+                                </div>
+                                <div class="text-2xl font-bold text-cyan-400 font-display">${avgScore}</div>
+                            </div>
+                            <div class="flex gap-2 text-xs">
+                                <span class="px-2 py-1 bg-slate-800 rounded">${player.data_nascita || 'N/D'}</span>
+                                <span class="px-2 py-1 bg-slate-800 rounded">${evalCount} valutazioni</span>
+                            </div>
+                        `;
+                        
+                        grid.appendChild(card);
+                        
+                    } catch (evalError) {
+                        console.error(`Errore caricamento valutazioni per ${player.id}:`, evalError);
+                        // Mostra la card comunque anche se le valutazioni falliscono
+                        const card = document.createElement('div');
+                        card.className = 'glass-panel p-6 rounded-2xl border border-slate-700 hover:border-cyan-500/50 cursor-pointer transition-all group';
+                        card.onclick = () => showPlayerDetail(player.id);
+                        
+                        card.innerHTML = `
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-bold text-lg group-hover:text-cyan-400 transition-colors">${player.cognome || 'N/D'} ${player.nome || 'N/D'}</h3>
+                                    <p class="text-sm text-slate-400">${player.categoria || 'N/D'} • ${player.ruolo || 'N/D'}</p>
+                                </div>
+                                <div class="text-2xl font-bold text-slate-500 font-display">--</div>
+                            </div>
+                            <div class="flex gap-2 text-xs">
+                                <span class="px-2 py-1 bg-slate-800 rounded">${player.data_nascita || 'N/D'}</span>
+                                <span class="px-2 py-1 bg-red-900/30 text-red-400 rounded">Errore dati</span>
+                            </div>
+                        `;
+                        
+                        grid.appendChild(card);
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Errore caricamento giocatori:', error);
+                loadingState.classList.add('hidden');
+                grid.innerHTML = `
+                    <div class="col-span-3 text-center py-8">
+                        <i data-lucide="alert-circle" class="w-12 h-12 text-red-500 mx-auto mb-4"></i>
+                        <p class="text-red-400 text-lg mb-2">Errore nel caricamento dei giocatori</p>
+                        <p class="text-slate-500 text-sm">${error.message}</p>
+                        <button onclick="loadPlayers()" class="mt-4 px-4 py-2 bg-cyan-500/20 text-cyan-400 rounded-lg hover:bg-cyan-500/30 transition-colors">
+                            Riprova
+                        </button>
+                    </div>
+                `;
+                lucide.createIcons();
             }
-            
-            grid.innerHTML += `
-                <div onclick="showPlayerDetail('${doc.id}')" class="glass-panel p-6 rounded-2xl border border-slate-700 hover:border-cyan-500/50 cursor-pointer transition-all group">
-                    <div class="flex justify-between items-start mb-4">
-                        <div>
-                            <h3 class="font-bold text-lg group-hover:text-cyan-400 transition-colors">${p.cognome} ${p.nome}</h3>
-                            <p class="text-sm text-slate-400">${p.categoria || 'N/D'} • ${p.ruolo || 'N/D'}</p>
-                        </div>
-                        <div class="text-2xl font-bold text-cyan-400 font-display">${avgScore}</div>
-                    </div>
-                    <div class="flex gap-2 text-xs">
-                        <span class="px-2 py-1 bg-slate-800 rounded">${p.data_nascita || 'N/D'}</span>
-                        <span class="px-2 py-1 bg-slate-800 rounded">${evals.size} valutazioni</span>
-                    </div>
-                </div>
-            `;
         }
-        
-        if (count === 0) {
-            grid.innerHTML = '<p class="text-slate-400 text-center py-8 col-span-3">Nessun giocatore trovato con questi filtri</p>';
+
+        function resetFilters() {
+            document.getElementById('filterCat').value = '';
+            document.getElementById('filterRuolo').value = '';
+            document.getElementById('searchPlayer').value = '';
+            loadPlayers();
         }
-        
-    } catch (error) {
-        console.error('Errore caricamento giocatori:', error);
-        document.getElementById('playersGrid').innerHTML = 
-            `<p class="text-red-400 text-center py-8 col-span-3">Errore: ${error.message}</p>`;
-    }
-}
+
         async function showPlayerDetail(playerId) {
             selectedPlayerId = playerId;
             showSection('dettaglio');
             
-            const playerDoc = await db.collection('giocatori').doc(playerId).get();
-            const p = playerDoc.data();
-            
-            document.getElementById('detailName').textContent = `${p.cognome} ${p.nome}`;
-            document.getElementById('detailInfo').textContent = `${p.categoria} • ${p.ruolo} • Nato il ${p.data_nascita}`;
-            
-            const evals = await db.collection('valutazioni')
-                .where('giocatore_id', '==', playerId)
-                .orderBy('timestamp', 'desc')
-                .get();
-            
-            let totalScore = 0, count = 0;
-            const history = [];
-            const skillCategories = { tecnica: [], cognitiva: [], fisica: [], psicologica: [] };
-            
-            evals.forEach(doc => {
-                const v = doc.data();
-                history.push(v);
-                
-                if (skillCategories[v.tipo]) {
-                    let sum = 0, num = 0;
-                    Object.keys(v).forEach(key => {
-                        if (typeof v[key] === 'number' && !['timestamp', 'giocatore_id'].includes(key)) {
-                            sum += v[key];
-                            num++;
-                        }
-                    });
-                    if (num > 0) skillCategories[v.tipo].push(sum / num);
+            try {
+                const playerDoc = await db.collection('giocatori').doc(playerId).get();
+                if (!playerDoc.exists) {
+                    alert('Giocatore non trovato');
+                    showSection('dashboard');
+                    return;
                 }
-            });
-            
-            const radarData = [
-                skillCategories.tecnica.length > 0 ? 
-                    skillCategories.tecnica.reduce((a,b) => a+b) / skillCategories.tecnica.length : 0,
-                skillCategories.cognitiva.length > 0 ? 
-                    skillCategories.cognitiva.reduce((a,b) => a+b) / skillCategories.cognitiva.length : 0,
-                skillCategories.fisica.length > 0 ? 
-                    skillCategories.fisica.reduce((a,b) => a+b) / skillCategories.fisica.length : 0,
-                skillCategories.psicologica.length > 0 ? 
-                    skillCategories.psicologica.reduce((a,b) => a+b) / skillCategories.psicologica.length : 0
-            ];
-            
-            const globalAvg = radarData.reduce((a,b) => a+b) / radarData.filter(x => x > 0).length || 0;
-            document.getElementById('detailScore').textContent = globalAvg > 0 ? globalAvg.toFixed(1) : '--';
-            
-            const histContainer = document.getElementById('detailHistory');
-            histContainer.innerHTML = '';
-            history.slice(0, 20).forEach(h => {
-                histContainer.innerHTML += `
-                    <div class="p-3 bg-slate-800/30 rounded-lg border border-slate-700 flex justify-between items-center">
-                        <div>
-                            <span class="capitalize font-semibold text-cyan-400">${h.tipo}</span>
-                            <span class="text-slate-400 text-sm ml-2">${h.data} • ${h.sessione}</span>
+                
+                const p = playerDoc.data();
+                
+                document.getElementById('detailName').textContent = `${p.cognome || 'N/D'} ${p.nome || 'N/D'}`;
+                document.getElementById('detailInfo').textContent = `${p.categoria || 'N/D'} • ${p.ruolo || 'N/D'} • Nato il ${p.data_nascita || 'N/D'}`;
+                
+                const evals = await db.collection('valutazioni')
+                    .where('giocatore_id', '==', playerId)
+                    .orderBy('timestamp', 'desc')
+                    .get();
+                
+                let totalScore = 0, count = 0;
+                const history = [];
+                const skillCategories = { tecnica: [], cognitiva: [], fisica: [], psicologica: [] };
+                
+                evals.forEach(doc => {
+                    const v = doc.data();
+                    history.push(v);
+                    
+                    if (skillCategories[v.tipo]) {
+                        let sum = 0, num = 0;
+                        Object.keys(v).forEach(key => {
+                            if (typeof v[key] === 'number' && !['timestamp', 'giocatore_id'].includes(key)) {
+                                sum += v[key];
+                                num++;
+                            }
+                        });
+                        if (num > 0) skillCategories[v.tipo].push(sum / num);
+                    }
+                });
+                
+                const radarData = [
+                    skillCategories.tecnica.length > 0 ? 
+                        skillCategories.tecnica.reduce((a,b) => a+b) / skillCategories.tecnica.length : 0,
+                    skillCategories.cognitiva.length > 0 ? 
+                        skillCategories.cognitiva.reduce((a,b) => a+b) / skillCategories.cognitiva.length : 0,
+                    skillCategories.fisica.length > 0 ? 
+                        skillCategories.fisica.reduce((a,b) => a+b) / skillCategories.fisica.length : 0,
+                    skillCategories.psicologica.length > 0 ? 
+                        skillCategories.psicologica.reduce((a,b) => a+b) / skillCategories.psicologica.length : 0
+                ];
+                
+                const validScores = radarData.filter(x => x > 0);
+                const globalAvg = validScores.length > 0 ? 
+                    radarData.reduce((a,b) => a+b) / validScores.length : 0;
+                    
+                document.getElementById('detailScore').textContent = globalAvg > 0 ? globalAvg.toFixed(1) : '--';
+                
+                const histContainer = document.getElementById('detailHistory');
+                histContainer.innerHTML = '';
+                
+                if (history.length === 0) {
+                    histContainer.innerHTML = `
+                        <div class="text-center py-8 text-slate-500">
+                            <i data-lucide="clipboard-x" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
+                            <p>Nessuna valutazione disponibile</p>
                         </div>
-                        <span class="text-xs text-slate-500">${new Date(h.timestamp?.toDate()).toLocaleDateString()}</span>
-                    </div>
-                `;
-            });
-            
-            createCharts(radarData, history);
+                    `;
+                } else {
+                    history.slice(0, 20).forEach(h => {
+                        const date = h.timestamp ? 
+                            new Date(h.timestamp.toDate()).toLocaleDateString('it-IT') : 
+                            'Data non disponibile';
+                        
+                        histContainer.innerHTML += `
+                            <div class="p-3 bg-slate-800/30 rounded-lg border border-slate-700 flex justify-between items-center hover:bg-slate-800/50 transition-colors">
+                                <div>
+                                    <span class="capitalize font-semibold text-cyan-400">${h.tipo || 'Generale'}</span>
+                                    <span class="text-slate-400 text-sm ml-2">${h.data || ''} • ${h.sessione || ''}</span>
+                                </div>
+                                <span class="text-xs text-slate-500">${date}</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                createCharts(radarData, history);
+                lucide.createIcons();
+                
+            } catch (error) {
+                console.error('Errore caricamento dettagli:', error);
+                alert('Errore nel caricamento dei dettagli del giocatore');
+            }
         }
 
         function createCharts(radarData, history) {
+            // Distruggi i grafici precedenti se esistono
+            if (radarChartInstance) {
+                radarChartInstance.destroy();
+            }
+            if (trendChartInstance) {
+                trendChartInstance.destroy();
+            }
+            
             const radarCtx = document.getElementById('radarChart').getContext('2d');
-            if (radarChartInstance) radarChartInstance.destroy();
             
             radarChartInstance = new Chart(radarCtx, {
                 type: 'radar',
@@ -460,25 +617,39 @@
                         data: radarData,
                         backgroundColor: 'rgba(0, 245, 212, 0.2)',
                         borderColor: '#00f5d4',
-                        borderWidth: 2
+                        borderWidth: 2,
+                        pointBackgroundColor: '#00f5d4',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: '#00f5d4'
                     }]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
                         r: {
                             beginAtZero: true,
                             max: 10,
                             grid: { color: 'rgba(255,255,255,0.1)' },
                             angleLines: { color: 'rgba(255,255,255,0.1)' },
-                            pointLabels: { color: 'white' }
+                            pointLabels: { 
+                                color: 'white',
+                                font: { size: 12, weight: 'bold' }
+                            },
+                            ticks: { 
+                                color: 'rgba(255,255,255,0.5)',
+                                backdropColor: 'transparent'
+                            }
                         }
                     },
-                    plugins: { legend: { display: false } }
+                    plugins: { 
+                        legend: { display: false }
+                    }
                 }
             });
             
             const trendCtx = document.getElementById('trendChart').getContext('2d');
-            if (trendChartInstance) trendChartInstance.destroy();
             
             const recentScores = history.slice(0, 6).reverse().map(h => {
                 let sum = 0, count = 0;
@@ -491,6 +662,11 @@
                 return count > 0 ? (sum / count).toFixed(1) : 0;
             });
             
+            // Se non ci sono dati, mostra un grafico vuoto ma valido
+            if (recentScores.length === 0) {
+                recentScores.push(0);
+            }
+            
             trendChartInstance = new Chart(trendCtx, {
                 type: 'line',
                 data: {
@@ -501,109 +677,187 @@
                         borderColor: '#00bbf9',
                         backgroundColor: 'rgba(0, 187, 249, 0.1)',
                         fill: true,
-                        tension: 0.4
+                        tension: 0.4,
+                        pointBackgroundColor: '#00bbf9',
+                        pointBorderColor: '#fff',
+                        pointRadius: 4
                     }]
                 },
                 options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
                     scales: {
-                        y: { beginAtZero: true, max: 10, grid: { color: 'rgba(255,255,255,0.1)' } },
-                        x: { grid: { display: false } }
+                        y: { 
+                            beginAtZero: true, 
+                            max: 10, 
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            ticks: { color: 'rgba(255,255,255,0.7)' }
+                        },
+                        x: { 
+                            grid: { display: false },
+                            ticks: { color: 'rgba(255,255,255,0.7)' }
+                        }
                     },
-                    plugins: { legend: { display: false } }
+                    plugins: { 
+                        legend: { display: false }
+                    }
                 }
             });
         }
 
         async function loadPendingApprovals() {
-            const snapshot = await db.collection('users')
-                .where('approved', '==', false)
-                .get();
-            
-            const container = document.getElementById('pendingApprovals');
-            container.innerHTML = '';
-            
-            if (snapshot.empty) {
-                container.innerHTML = '<p class="text-slate-400 text-center py-8">Nessuna richiesta pendente</p>';
-                return;
-            }
-            
-            snapshot.forEach(doc => {
-                const u = doc.data();
-                container.innerHTML += `
-                    <div class="glass-panel p-6 rounded-2xl border border-slate-700 flex justify-between items-center">
+            try {
+                const snapshot = await db.collection('users')
+                    .where('approved', '==', false)
+                    .get();
+                
+                const container = document.getElementById('pendingApprovals');
+                container.innerHTML = '';
+                
+                if (snapshot.empty) {
+                    container.innerHTML = `
+                        <div class="text-center py-12">
+                            <i data-lucide="check-circle" class="w-16 h-16 text-green-500 mx-auto mb-4 opacity-50"></i>
+                            <p class="text-slate-400 text-lg">Nessuna richiesta pendente</p>
+                            <p class="text-slate-500 text-sm mt-2">Tutti gli utenti sono stati approvati</p>
+                        </div>
+                    `;
+                    lucide.createIcons();
+                    return;
+                }
+                
+                snapshot.forEach(doc => {
+                    const u = doc.data();
+                    const createdAt = u.createdAt ? 
+                        new Date(u.createdAt.toDate()).toLocaleDateString('it-IT') : 
+                        'Data non disponibile';
+                    
+                    const div = document.createElement('div');
+                    div.className = 'glass-panel p-6 rounded-2xl border border-slate-700 flex justify-between items-center hover:border-slate-600 transition-all';
+                    div.innerHTML = `
                         <div>
-                            <div class="font-bold text-lg">${u.name}</div>
-                            <div class="text-sm text-slate-400">${u.email} • ${u.role}</div>
-                            <div class="text-xs text-slate-500 mt-1">Registrato il ${new Date(u.createdAt?.toDate()).toLocaleDateString()}</div>
+                            <div class="font-bold text-lg">${u.name || 'Nome non disponibile'}</div>
+                            <div class="text-sm text-slate-400">${u.email || 'Email non disponibile'} • ${u.role || 'Ruolo non specificato'}</div>
+                            <div class="text-xs text-slate-500 mt-1">Registrato il ${createdAt}</div>
                         </div>
                         <div class="flex gap-2">
                             <button onclick="approveUser('${doc.id}', true)" 
-                                class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors">
+                                class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors flex items-center gap-2">
+                                <i data-lucide="check" class="w-4 h-4"></i>
                                 Approva
                             </button>
                             <button onclick="approveUser('${doc.id}', false)" 
-                                class="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors">
+                                class="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors flex items-center gap-2">
+                                <i data-lucide="x" class="w-4 h-4"></i>
                                 Rifiuta
                             </button>
                         </div>
-                    </div>
-                `;
-            });
+                    `;
+                    container.appendChild(div);
+                });
+                
+                lucide.createIcons();
+                
+            } catch (error) {
+                console.error('Errore caricamento approvazioni:', error);
+            }
         }
 
         async function approveUser(userId, approve) {
-            if (approve) {
-                await db.collection('users').doc(userId).update({ approved: true });
-            } else {
-                await db.collection('users').doc(userId).delete();
+            try {
+                if (approve) {
+                    await db.collection('users').doc(userId).update({ approved: true });
+                } else {
+                    await db.collection('users').doc(userId).delete();
+                }
+                await loadPendingApprovals();
+                await loadStats();
+            } catch (error) {
+                console.error('Errore approvazione utente:', error);
+                alert('Errore durante l\'operazione. Riprova.');
             }
-            loadPendingApprovals();
-            loadStats();
         }
 
         document.getElementById('addPlayerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const newPlayer = {
-                nome: document.getElementById('newNome').value,
-                cognome: document.getElementById('newCognome').value,
-                data_nascita: document.getElementById('newDataNascita').value,
-                categoria: document.getElementById('newCategoria').value,
-                ruolo: document.getElementById('newRuolo').value,
-                created_at: firebase.firestore.FieldValue.serverTimestamp()
-            };
+            const submitBtn = e.target.querySelector('button[type="submit"]');
+            const originalText = submitBtn.textContent;
+            submitBtn.textContent = 'Caricamento...';
+            submitBtn.disabled = true;
             
-            await db.collection('giocatori').add(newPlayer);
-            alert('Giocatore aggiunto con successo!');
-            e.target.reset();
-            loadStats();
-            loadPlayers();
+            try {
+                const newPlayer = {
+                    nome: document.getElementById('newNome').value.trim(),
+                    cognome: document.getElementById('newCognome').value.trim(),
+                    data_nascita: document.getElementById('newDataNascita').value,
+                    categoria: document.getElementById('newCategoria').value,
+                    ruolo: document.getElementById('newRuolo').value,
+                    created_at: firebase.firestore.FieldValue.serverTimestamp(),
+                    updated_at: firebase.firestore.FieldValue.serverTimestamp()
+                };
+                
+                await db.collection('giocatori').add(newPlayer);
+                
+                // Reset cache e ricarica
+                allPlayers = [];
+                await loadStats();
+                await loadPlayers();
+                
+                // Mostra notifica di successo
+                const notification = document.createElement('div');
+                notification.className = 'fixed bottom-4 right-4 bg-green-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 flex items-center gap-2';
+                notification.innerHTML = '<i data-lucide="check-circle" class="w-5 h-5"></i> Giocatore aggiunto con successo!';
+                document.body.appendChild(notification);
+                lucide.createIcons();
+                
+                setTimeout(() => notification.remove(), 3000);
+                
+                e.target.reset();
+                
+            } catch (error) {
+                console.error('Errore aggiunta giocatore:', error);
+                alert('Errore durante l\'aggiunta del giocatore: ' + error.message);
+            } finally {
+                submitBtn.textContent = originalText;
+                submitBtn.disabled = false;
+            }
         });
 
         async function exportData() {
-            const players = await db.collection('giocatori').get();
-            const evals = await db.collection('valutazioni').get();
-            
-            let csv = 'Tipo,ID,Nome,Cognome,Categoria,Ruolo,Data\n';
-            
-            players.forEach(doc => {
-                const p = doc.data();
-                csv += `Giocatore,${doc.id},${p.nome},${p.cognome},${p.categoria},${p.ruolo},${p.data_nascita}\n`;
-            });
-            
-            evals.forEach(doc => {
-                const v = doc.data();
-                csv += `Valutazione,${doc.id},${v.giocatore_id},${v.tipo},${v.data},${v.sessione},${v.note || ''}\n`;
-            });
-            
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = window.URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `sincro_export_${new Date().toISOString().split('T')[0]}.csv`;
-            a.click();
+            try {
+                const players = await db.collection('giocatori').get();
+                const evals = await db.collection('valutazioni').get();
+                
+                let csv = 'Tipo,ID,Nome,Cognome,Categoria,Ruolo,Data\n';
+                
+                players.forEach(doc => {
+                    const p = doc.data();
+                    csv += `Giocatore,${doc.id},"${p.nome || ''}","${p.cognome || ''}",${p.categoria || ''},${p.ruolo || ''},${p.data_nascita || ''}\n`;
+                });
+                
+                evals.forEach(doc => {
+                    const v = doc.data();
+                    csv += `Valutazione,${doc.id},${v.giocatore_id || ''},${v.tipo || ''},${v.data || ''},${v.sessione || ''},"${v.note || ''}"\n`;
+                });
+                
+                const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `sincro_export_${new Date().toISOString().split('T')[0]}.csv`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                window.URL.revokeObjectURL(url);
+                
+            } catch (error) {
+                console.error('Errore esportazione:', error);
+                alert('Errore durante l\'esportazione dei dati');
+            }
         }
 
+        // Inizializza icone al caricamento
         lucide.createIcons();
     </script>
 </body>
