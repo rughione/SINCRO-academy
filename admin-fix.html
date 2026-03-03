@@ -3,15 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin - S.I.N.C.R.O.</title>
+    <title>Admin - S.I.N.C.R.O. Talent Forge</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Inter:wght@300;400;600;800&display=swap');
         * { font-family: 'Inter', sans-serif; }
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
+        
         .glass-panel {
             background: rgba(15, 23, 42, 0.7);
             backdrop-filter: blur(12px);
@@ -21,125 +24,268 @@
 </head>
 <body class="bg-slate-900 text-white min-h-screen">
     
-    <nav class="glass-panel border-b border-slate-700/50 p-4">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <h1 class="text-xl font-bold">S.I.N.C.R.O. ADMIN</h1>
-            <button onclick="logout()" class="text-red-400">Logout</button>
+    <!-- Header -->
+    <nav class="glass-panel border-b border-slate-700/50 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-cyan-400 to-blue-600 flex items-center justify-center">
+                        <i data-lucide="activity" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span class="font-display font-bold text-xl">S.I.N.C.R.O. <span class="text-cyan-400">ADMIN</span></span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span class="text-sm text-slate-400">Amministratore</span>
+                    <button onclick="logout()" class="text-red-400 hover:text-red-300 text-sm flex items-center gap-1">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
         </div>
     </nav>
 
-    <div class="max-w-7xl mx-auto p-4">
+    <div class="max-w-7xl mx-auto px-4 py-8">
         
-        <!-- Stats -->
-        <div class="grid grid-cols-4 gap-4 mb-6">
-            <div class="glass-panel p-4 rounded-xl">
-                <div class="text-slate-400 text-sm">Totale Giocatori</div>
-                <div class="text-2xl font-bold" id="statTotalPlayers">0</div>
+        <!-- Stats Overview -->
+        <div class="grid md:grid-cols-4 gap-6 mb-8">
+            <div class="glass-panel p-6 rounded-2xl border border-cyan-500/30">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-400 text-sm">Totale Giocatori</span>
+                    <i data-lucide="users" class="w-5 h-5 text-cyan-400"></i>
+                </div>
+                <div class="text-3xl font-bold font-display" id="statTotalPlayers">0</div>
+            </div>
+            
+            <div class="glass-panel p-6 rounded-2xl border border-purple-500/30">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-400 text-sm">Valutazioni Oggi</span>
+                    <i data-lucide="clipboard-check" class="w-5 h-5 text-purple-400"></i>
+                </div>
+                <div class="text-3xl font-bold font-display" id="statTodayEvals">0</div>
+            </div>
+            
+            <div class="glass-panel p-6 rounded-2xl border border-green-500/30">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-400 text-sm">Staff Attivo</span>
+                    <i data-lucide="user-check" class="w-5 h-5 text-green-400"></i>
+                </div>
+                <div class="text-3xl font-bold font-display" id="statActiveStaff">0</div>
+            </div>
+            
+            <div class="glass-panel p-6 rounded-2xl border border-yellow-500/30">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-400 text-sm">In Attesa</span>
+                    <i data-lucide="clock" class="w-5 h-5 text-yellow-400"></i>
+                </div>
+                <div class="text-3xl font-bold font-display" id="statPending">0</div>
             </div>
         </div>
 
         <!-- Filters -->
-        <div class="glass-panel p-4 rounded-xl mb-6 flex gap-4">
-            <select id="filterCat" onchange="loadPlayers()" class="bg-slate-800 text-white p-2 rounded">
+        <div class="glass-panel p-4 rounded-2xl border border-slate-700 flex gap-4 flex-wrap mb-6">
+            <select id="filterCat" onchange="loadPlayers()" class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600">
                 <option value="">Tutte le categorie</option>
                 <option value="E1">Esordienti 1°</option>
                 <option value="E2">Esordienti 2°</option>
                 <option value="G1">Giovanissimi 1°</option>
             </select>
-            <input type="text" id="searchPlayer" placeholder="Cerca..." onkeyup="loadPlayers()" class="bg-slate-800 text-white p-2 rounded flex-1">
+            <select id="filterRuolo" onchange="loadPlayers()" class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600">
+                <option value="">Tutti i ruoli</option>
+                <option value="Portiere">Portiere</option>
+                <option value="Difensore">Difensore</option>
+                <option value="Centrocampista">Centrocampista</option>
+                <option value="Attaccante">Attaccante</option>
+            </select>
+            <input type="text" id="searchPlayer" placeholder="Cerca giocatore..." onkeyup="loadPlayers()"
+                class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600 flex-1 min-w-[200px]">
         </div>
 
         <!-- Players Grid -->
-        <div id="playersGrid" class="grid grid-cols-3 gap-4">
+        <div id="playersGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
             <div class="col-span-3 text-center py-8 text-slate-400">Caricamento...</div>
         </div>
 
     </div>
 
     <script>
-        // Firebase config
+        // 🔥 CONFIGURAZIONE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAlksSPuBgbYgzZmtUk3jYJMMtXEBCgM94",
             authDomain: "sincro-academy.firebaseapp.com",
             projectId: "sincro-academy",
             storageBucket: "sincro-academy.firebasestorage.app",
             messagingSenderId: "139698272933",
-            appId: "1:139698272933:web:c4307e00b69757766beb4c"
+            appId: "1:139698272933:web:c4307e00b69757766beb4c",
+            measurementId: "G-CD4QB2ZXRS"
         };
 
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        let currentUser = null;
+
+        // Verifica autenticazione
         auth.onAuthStateChanged(async (user) => {
             if (!user) {
                 window.location.href = 'login.html';
                 return;
             }
+            
             const userDoc = await db.collection('users').doc(user.uid).get();
             if (!userDoc.exists || userDoc.data().role !== 'admin') {
+                alert('Accesso riservato solo agli amministratori');
                 await auth.signOut();
                 window.location.href = 'login.html';
                 return;
             }
+            
+            currentUser = user;
             loadStats();
             loadPlayers();
         });
 
         function logout() {
-            auth.signOut().then(() => window.location.href = 'login.html');
+            auth.signOut().then(() => {
+                window.location.href = 'login.html';
+            });
         }
 
         async function loadStats() {
-            const snap = await db.collection('giocatori').get();
-            document.getElementById('statTotalPlayers').textContent = snap.size;
+            try {
+                const playersSnap = await db.collection('giocatori').get();
+                document.getElementById('statTotalPlayers').textContent = playersSnap.size;
+                
+                const today = new Date().toISOString().split('T')[0];
+                const evalsSnap = await db.collection('valutazioni')
+                    .where('data', '==', today).get();
+                document.getElementById('statTodayEvals').textContent = evalsSnap.size;
+                
+                const staffSnap = await db.collection('users')
+                    .where('approved', '==', true).get();
+                document.getElementById('statActiveStaff').textContent = staffSnap.size;
+                
+                const pendingSnap = await db.collection('users')
+                    .where('approved', '==', false).get();
+                document.getElementById('statPending').textContent = pendingSnap.size;
+            } catch (error) {
+                console.error('Errore stats:', error);
+            }
         }
 
-        // 🔧 FUNZIONE CORRETTA - Senza orderBy!
+        // 🔧 FUNZIONE CORRETTA - Senza orderBy che richiede indice!
         async function loadPlayers() {
             const categoria = document.getElementById('filterCat').value;
-            const search = document.getElementById('searchPlayer').value.toLowerCase();
-            const grid = document.getElementById('playersGrid');
+            const ruolo = document.getElementById('filterRuolo').value;
+            const search = document.getElementById('searchPlayer').value.toLowerCase().trim();
             
-            grid.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-400">Caricamento...</div>';
+            const grid = document.getElementById('playersGrid');
+            grid.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-400">Caricamento giocatori...</div>';
             
             try {
+                console.log('Inizio caricamento giocatori...');
+                
+                // ⚠️ NESSUN .orderBy() - evita l'errore di indice Firebase!
                 const snapshot = await db.collection('giocatori').get();
+                
+                console.log('Documenti trovati:', snapshot.size);
+                
                 let players = [];
-                snapshot.forEach(doc => players.push({id: doc.id, ...doc.data()}));
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    console.log('Giocatore:', doc.id, data);
+                    players.push({ id: doc.id, ...data });
+                });
                 
-                // Ordina in memoria
-                players.sort((a, b) => (a.cognome || '').localeCompare(b.cognome || ''));
+                // Ordina in memoria con JavaScript
+                players.sort((a, b) => {
+                    const cognomeA = (a.cognome || '').toLowerCase();
+                    const cognomeB = (b.cognome || '').toLowerCase();
+                    if (cognomeA < cognomeB) return -1;
+                    if (cognomeA > cognomeB) return 1;
+                    const nomeA = (a.nome || '').toLowerCase();
+                    const nomeB = (b.nome || '').toLowerCase();
+                    return nomeA.localeCompare(nomeB);
+                });
                 
-                // Filtra
+                // Applica filtri
                 let filtered = players.filter(p => {
                     if (categoria && p.categoria !== categoria) return false;
-                    if (search && !(`${p.nome} ${p.cognome}`.toLowerCase().includes(search))) return false;
+                    if (ruolo && p.ruolo !== ruolo) return false;
+                    if (search) {
+                        const fullName = `${p.nome || ''} ${p.cognome || ''}`.toLowerCase();
+                        if (!fullName.includes(search)) return false;
+                    }
                     return true;
                 });
+                
+                console.log('Dopo filtri:', filtered.length);
                 
                 grid.innerHTML = '';
                 
                 if (filtered.length === 0) {
-                    grid.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-500">Nessun giocatore trovato</div>';
+                    grid.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-500">Nessun giocatore trovato con questi filtri</div>';
                     return;
                 }
                 
-                filtered.forEach(player => {
-                    grid.innerHTML += `
-                        <div class="glass-panel p-4 rounded-xl border border-slate-700">
-                            <h3 class="font-bold text-lg">${player.cognome || 'N/D'} ${player.nome || 'N/D'}</h3>
-                            <p class="text-sm text-slate-400">${player.categoria || 'N/D'}</p>
-                            <p class="text-xs text-slate-500 mt-2">${player.data_nascita || 'N/D'}</p>
-                        </div>
-                    `;
-                });
+                for (const player of filtered) {
+                    try {
+                        // Calcola punteggio medio
+                        let avgScore = '--';
+                        const evals = await db.collection('valutazioni')
+                            .where('giocatore_id', '==', player.id)
+                            .limit(5)
+                            .get();
+                        
+                        if (!evals.empty) {
+                            let total = 0, count = 0;
+                            evals.forEach(e => {
+                                const data = e.data();
+                                Object.keys(data).forEach(key => {
+                                    if (typeof data[key] === 'number' && key !== 'timestamp') {
+                                        total += data[key];
+                                        count++;
+                                    }
+                                });
+                            });
+                            avgScore = count > 0 ? (total / count).toFixed(1) : '--';
+                        }
+                        
+                        const card = document.createElement('div');
+                        card.className = 'glass-panel p-6 rounded-2xl border border-slate-700 hover:border-cyan-500/50 cursor-pointer transition-all group';
+                        
+                        card.innerHTML = `
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-bold text-lg group-hover:text-cyan-400 transition-colors">${player.cognome || 'N/D'} ${player.nome || 'N/D'}</h3>
+                                    <p class="text-sm text-slate-400">${player.categoria || 'N/D'} • ${player.ruolo || 'N/D'}</p>
+                                </div>
+                                <div class="text-2xl font-bold text-cyan-400 font-display">${avgScore}</div>
+                            </div>
+                            <div class="flex gap-2 text-xs">
+                                <span class="px-2 py-1 bg-slate-800 rounded">${player.data_nascita || 'N/D'}</span>
+                                <span class="px-2 py-1 bg-slate-800 rounded">${evals.size} valutazioni</span>
+                            </div>
+                        `;
+                        
+                        grid.appendChild(card);
+                        
+                    } catch (err) {
+                        console.error('Errore card:', err);
+                    }
+                }
+                
+                lucide.createIcons();
                 
             } catch (error) {
-                grid.innerHTML = `<div class="col-span-3 text-center py-8 text-red-400">Errore: ${error.message}</div>`;
+                console.error('Errore loadPlayers:', error);
+                grid.innerHTML = `<div class="col-span-3 text-center py-8 text-red-400">
+                    <strong>Errore caricamento:</strong><br>${error.message}<br>
+                    <button onclick="loadPlayers()" class="mt-4 px-4 py-2 bg-cyan-500/20 text-cyan-400 rounded">Riprova</button>
+                </div>`;
             }
         }
-        
+
         lucide.createIcons();
     </script>
 </body>
