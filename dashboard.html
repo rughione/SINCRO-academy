@@ -299,62 +299,88 @@
             }
         }
 
-        async function loadPlayers() {
-            const categoria = document.getElementById('filterCat').value;
-            const ruolo = document.getElementById('filterRuolo').value;
-            const search = document.getElementById('searchPlayer').value.toLowerCase();
-            
-            let query = db.collection('giocatori').orderBy('cognome');
-            if (categoria) query = query.where('categoria', '==', categoria);
-            if (ruolo) query = query.where('ruolo', '==', ruolo);
-            
-            const snapshot = await query.get();
-            const grid = document.getElementById('playersGrid');
-            grid.innerHTML = '';
-            
-            for (const doc of snapshot.docs) {
-                const p = doc.data();
-                if (search && !(`${p.nome} ${p.cognome}`.toLowerCase().includes(search))) continue;
-                
-                const evals = await db.collection('valutazioni')
-                    .where('giocatore_id', '==', doc.id)
-                    .orderBy('timestamp', 'desc')
-                    .limit(5)
-                    .get();
-                
-                let avgScore = '--';
-                if (!evals.empty) {
-                    let total = 0, count = 0;
-                    evals.forEach(e => {
-                        const data = e.data();
-                        Object.keys(data).forEach(key => {
-                            if (typeof data[key] === 'number' && key !== 'timestamp') {
-                                total += data[key];
-                                count++;
-                            }
-                        });
-                    });
-                    avgScore = count > 0 ? (total / count).toFixed(1) : '--';
-                }
-                
-                grid.innerHTML += `
-                    <div onclick="showPlayerDetail('${doc.id}')" class="glass-panel p-6 rounded-2xl border border-slate-700 hover:border-cyan-500/50 cursor-pointer transition-all group">
-                        <div class="flex justify-between items-start mb-4">
-                            <div>
-                                <h3 class="font-bold text-lg group-hover:text-cyan-400 transition-colors">${p.cognome} ${p.nome}</h3>
-                                <p class="text-sm text-slate-400">${p.categoria} • ${p.ruolo}</p>
-                            </div>
-                            <div class="text-2xl font-bold text-cyan-400 font-display">${avgScore}</div>
-                        </div>
-                        <div class="flex gap-2 text-xs">
-                            <span class="px-2 py-1 bg-slate-800 rounded">${p.data_nascita}</span>
-                            <span class="px-2 py-1 bg-slate-800 rounded">${evals.size} valutazioni</span>
-                        </div>
-                    </div>
-                `;
-            }
+      async function loadPlayers() {
+    const categoria = document.getElementById('filterCat').value;
+    const ruolo = document.getElementById('filterRuolo').value;
+    const search = document.getElementById('searchPlayer').value.toLowerCase();
+    
+    // Se nessun filtro, carica tutti
+    let query = db.collection('giocatori').orderBy('cognome');
+    
+    try {
+        const snapshot = await query.get();
+        const grid = document.getElementById('playersGrid');
+        grid.innerHTML = '';
+        
+        if (snapshot.empty) {
+            grid.innerHTML = '<p class="text-slate-400 text-center py-8 col-span-3">Nessun giocatore trovato</p>';
+            return;
         }
-
+        
+        let count = 0;
+        
+        for (const doc of snapshot.docs) {
+            const p = doc.data();
+            
+            // Filtra per categoria se selezionata
+            if (categoria && p.categoria !== categoria) continue;
+            
+            // Filtra per ruolo se selezionato
+            if (ruolo && p.ruolo !== ruolo) continue;
+            
+            // Filtra per ricerca testuale
+            if (search && !(`${p.nome} ${p.cognome}`.toLowerCase().includes(search))) continue;
+            
+            count++;
+            
+            const evals = await db.collection('valutazioni')
+                .where('giocatore_id', '==', doc.id)
+                .orderBy('timestamp', 'desc')
+                .limit(5)
+                .get();
+            
+            let avgScore = '--';
+            if (!evals.empty) {
+                let total = 0, count = 0;
+                evals.forEach(e => {
+                    const data = e.data();
+                    Object.keys(data).forEach(key => {
+                        if (typeof data[key] === 'number' && key !== 'timestamp') {
+                            total += data[key];
+                            count++;
+                        }
+                    });
+                });
+                avgScore = count > 0 ? (total / count).toFixed(1) : '--';
+            }
+            
+            grid.innerHTML += `
+                <div onclick="showPlayerDetail('${doc.id}')" class="glass-panel p-6 rounded-2xl border border-slate-700 hover:border-cyan-500/50 cursor-pointer transition-all group">
+                    <div class="flex justify-between items-start mb-4">
+                        <div>
+                            <h3 class="font-bold text-lg group-hover:text-cyan-400 transition-colors">${p.cognome} ${p.nome}</h3>
+                            <p class="text-sm text-slate-400">${p.categoria || 'N/D'} • ${p.ruolo || 'N/D'}</p>
+                        </div>
+                        <div class="text-2xl font-bold text-cyan-400 font-display">${avgScore}</div>
+                    </div>
+                    <div class="flex gap-2 text-xs">
+                        <span class="px-2 py-1 bg-slate-800 rounded">${p.data_nascita || 'N/D'}</span>
+                        <span class="px-2 py-1 bg-slate-800 rounded">${evals.size} valutazioni</span>
+                    </div>
+                </div>
+            `;
+        }
+        
+        if (count === 0) {
+            grid.innerHTML = '<p class="text-slate-400 text-center py-8 col-span-3">Nessun giocatore trovato con questi filtri</p>';
+        }
+        
+    } catch (error) {
+        console.error('Errore caricamento giocatori:', error);
+        document.getElementById('playersGrid').innerHTML = 
+            `<p class="text-red-400 text-center py-8 col-span-3">Errore: ${error.message}</p>`;
+    }
+}
         async function showPlayerDetail(playerId) {
             selectedPlayerId = playerId;
             showSection('dettaglio');
