@@ -27,37 +27,12 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        
-        .debug-box {
-            background: #1e293b;
-            border: 2px solid #ef4444;
-            color: #fecaca;
-            padding: 16px;
-            margin: 10px 0;
-            border-radius: 8px;
-            font-family: monospace;
-            font-size: 12px;
-            white-space: pre-wrap;
-            max-height: 200px;
-            overflow-y: auto;
-        }
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen">
     
-    <!-- DEBUG CONSOLE VISIVA -->
-    <div id="debugConsole" class="fixed top-20 right-4 w-96 z-50 hidden">
-        <div class="glass-panel p-4 rounded-xl border border-red-500/50">
-            <div class="flex justify-between items-center mb-2">
-                <h3 class="text-red-400 font-bold text-sm">🔴 DEBUG CONSOLE</h3>
-                <button onclick="document.getElementById('debugConsole').classList.add('hidden')" class="text-slate-400 hover:text-white">✕</button>
-            </div>
-            <div id="debugOutput" class="text-xs font-mono text-slate-300 max-h-64 overflow-y-auto"></div>
-        </div>
-    </div>
-
     <!-- Header -->
-    <nav class="glass-panel border-b border-slate-700/50 sticky top-0 z-40">
+    <nav class="glass-panel border-b border-slate-700/50 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
                 <div class="flex items-center space-x-3">
@@ -67,9 +42,6 @@
                     <span class="font-display font-bold text-xl">S.I.N.C.R.O. <span class="text-cyan-400">ADMIN</span></span>
                 </div>
                 <div class="flex items-center gap-4">
-                    <button onclick="toggleDebug()" class="px-3 py-1 bg-red-500/20 text-red-400 rounded text-xs hover:bg-red-500/30">
-                        DEBUG
-                    </button>
                     <button onclick="showSection('approvazioni')" class="relative p-2 text-slate-400 hover:text-white">
                         <i data-lucide="bell" class="w-5 h-5"></i>
                         <span id="badgeApprovazioni" class="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center hidden">0</span>
@@ -139,14 +111,6 @@
         <!-- SECTION: Dashboard Giocatori -->
         <div id="section-dashboard" class="space-y-6">
             
-            <!-- DEBUG INFO -->
-            <div id="debugInfo" class="hidden">
-                <div class="glass-panel p-4 rounded-xl border border-yellow-500/30 mb-4">
-                    <h3 class="text-yellow-400 font-bold mb-2">Informazioni Debug</h3>
-                    <div id="debugContent" class="text-sm text-slate-300 font-mono"></div>
-                </div>
-            </div>
-
             <!-- Filters -->
             <div class="glass-panel p-4 rounded-2xl border border-slate-700 flex gap-4 flex-wrap">
                 <select id="filterCat" onchange="loadPlayers()" class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600">
@@ -164,23 +128,66 @@
                 </select>
                 <input type="text" id="searchPlayer" placeholder="Cerca giocatore..." onkeyup="loadPlayers()"
                     class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600 flex-1 min-w-[200px]">
-                <button onclick="forceReload()" class="px-4 py-2 bg-cyan-500/20 text-cyan-400 rounded-lg hover:bg-cyan-500/30">
-                    🔄 Ricarica
-                </button>
             </div>
 
             <!-- Players Grid -->
             <div id="playersGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div class="col-span-3 text-center py-12 text-slate-500">
-                    Caricamento giocatori...
+                <!-- Popolato via JS -->
+            </div>
+        </div>
+
+        <!-- SECTION: Dettaglio Giocatore -->
+        <div id="section-dettaglio" class="hidden space-y-6">
+            <div class="glass-panel rounded-2xl p-6 border border-slate-700">
+                <div class="flex justify-between items-start mb-6">
+                    <div>
+                        <h2 class="font-display text-2xl font-bold mb-2" id="detailName">Seleziona un giocatore</h2>
+                        <p class="text-slate-400" id="detailInfo">Dalla dashboard per vedere i dettagli</p>
+                    </div>
+                    <div class="text-right">
+                        <div class="text-sm text-slate-400">Talent Forge Score</div>
+                        <div class="text-4xl font-bold gradient-text font-display" id="detailScore">--</div>
+                    </div>
+                </div>
+
+                <!-- Charts -->
+                <div class="grid md:grid-cols-2 gap-6 mb-6">
+                    <div class="bg-slate-800/50 p-4 rounded-xl">
+                        <h3 class="font-semibold mb-4">Andamento 6 Mesi</h3>
+                        <canvas id="trendChart" height="200"></canvas>
+                    </div>
+                    <div class="bg-slate-800/50 p-4 rounded-xl">
+                        <h3 class="font-semibold mb-4">Radar Competenze</h3>
+                        <canvas id="radarChart" height="200"></canvas>
+                    </div>
+                </div>
+
+                <!-- Storico Valutazioni -->
+                <h3 class="font-semibold mb-4">Storico Completo Valutazioni</h3>
+                <div id="detailHistory" class="space-y-2 max-h-96 overflow-y-auto">
+                    <!-- Popolato via JS -->
                 </div>
             </div>
         </div>
 
-        <!-- ALTRE SEZIONI (simplified per brevità) -->
-        <div id="section-dettaglio" class="hidden"><div class="glass-panel p-8 text-center text-slate-400">Seleziona un giocatore dalla dashboard</div></div>
-        <div id="section-approvazioni" class="hidden"><div class="glass-panel p-8 text-center text-slate-400">Nessuna richiesta pendente</div></div>
-        <div id="section-database" class="hidden">
+        <!-- SECTION: Approvazioni -->
+        <div id="section-approvazioni" class="hidden space-y-4">
+            <h2 class="font-display text-2xl font-bold mb-6">Richieste di Accesso Pendenti</h2>
+            <div id="pendingApprovals" class="space-y-4">
+                <!-- Popolato via JS -->
+            </div>
+        </div>
+
+        <!-- SECTION: Database -->
+        <div id="section-database" class="hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="font-display text-2xl font-bold">Gestione Database</h2>
+                <button onclick="exportData()" class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors">
+                    <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+                    Esporta CSV
+                </button>
+            </div>
+            
             <div class="glass-panel p-6 rounded-2xl border border-slate-700">
                 <h3 class="font-semibold mb-4">Aggiungi Nuovo Giocatore</h3>
                 <form id="addPlayerForm" class="grid md:grid-cols-2 gap-4">
@@ -200,7 +207,7 @@
                         <option value="Centrocampista">Centrocampista</option>
                         <option value="Attaccante">Attaccante</option>
                     </select>
-                    <button type="submit" class="px-4 py-2 bg-cyan-500 text-slate-900 rounded-lg font-bold hover:bg-cyan-400">
+                    <button type="submit" class="px-4 py-2 bg-cyan-500 text-slate-900 rounded-lg font-bold hover:bg-cyan-400 transition-colors">
                         Aggiungi Giocatore
                     </button>
                 </form>
@@ -210,32 +217,6 @@
     </div>
 
     <script>
-        // DEBUG FUNCTION
-        function log(msg, type = 'info') {
-            const timestamp = new Date().toLocaleTimeString();
-            const line = `[${timestamp}] ${msg}`;
-            console.log(line);
-            
-            const debugOutput = document.getElementById('debugOutput');
-            if (debugOutput) {
-                const div = document.createElement('div');
-                div.className = type === 'error' ? 'text-red-400' : (type === 'success' ? 'text-green-400' : 'text-slate-300');
-                div.textContent = line;
-                debugOutput.appendChild(div);
-                debugOutput.scrollTop = debugOutput.scrollHeight;
-            }
-        }
-
-        function toggleDebug() {
-            const el = document.getElementById('debugConsole');
-            el.classList.toggle('hidden');
-        }
-
-        function showDebugInfo(html) {
-            document.getElementById('debugInfo').classList.remove('hidden');
-            document.getElementById('debugContent').innerHTML = html;
-        }
-
         // 🔥 CONFIGURAZIONE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyAlksSPuBgbYgzZmtUk3jYJMMtXEBCgM94",
@@ -247,48 +228,34 @@
             measurementId: "G-CD4QB2ZXRS"
         };
 
-        try {
-            firebase.initializeApp(firebaseConfig);
-            log('Firebase inizializzato correttamente', 'success');
-        } catch (e) {
-            log('ERRORE Firebase init: ' + e.message, 'error');
-        }
-
+        firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
         let currentUser = null;
-        let allPlayers = [];
+        let selectedPlayerId = null;
+        let trendChartInstance = null;
+        let radarChartInstance = null;
 
+        // Verifica autenticazione e ruolo admin
         auth.onAuthStateChanged(async (user) => {
-            log('Auth state changed: ' + (user ? user.uid : 'null'));
-            
             if (!user) {
                 window.location.href = 'login.html';
                 return;
             }
             
-            try {
-                const userDoc = await db.collection('users').doc(user.uid).get();
-                log('User doc exists: ' + userDoc.exists);
-                
-                if (!userDoc.exists || userDoc.data().role !== 'admin') {
-                    alert('Accesso riservato solo agli amministratori');
-                    await auth.signOut();
-                    window.location.href = 'login.html';
-                    return;
-                }
-                
-                currentUser = user;
-                log('Admin autenticato: ' + user.email);
-                
-                await loadStats();
-                await loadPlayers();
-                
-            } catch (error) {
-                log('ERRORE auth: ' + error.message, 'error');
-                console.error(error);
+            const userDoc = await db.collection('users').doc(user.uid).get();
+            if (!userDoc.exists || userDoc.data().role !== 'admin') {
+                alert('Accesso riservato solo agli amministratori');
+                await auth.signOut();
+                window.location.href = 'login.html';
+                return;
             }
+            
+            currentUser = user;
+            loadStats();
+            loadPlayers();
+            loadPendingApprovals();
         });
 
         function logout() {
@@ -310,62 +277,59 @@
         }
 
         async function loadStats() {
-            try {
-                log('Caricamento statistiche...');
-                const playersSnap = await db.collection('giocatori').get();
-                document.getElementById('statTotalPlayers').textContent = playersSnap.size;
-                log('Totale giocatori: ' + playersSnap.size, 'success');
-                
-                const today = new Date().toISOString().split('T')[0];
-                const evalsSnap = await db.collection('valutazioni').where('data', '==', today).get();
-                document.getElementById('statTodayEvals').textContent = evalsSnap.size;
-                
-                const staffSnap = await db.collection('users').where('approved', '==', true).get();
-                document.getElementById('statActiveStaff').textContent = staffSnap.size;
-                
-                const pendingSnap = await db.collection('users').where('approved', '==', false).get();
-                document.getElementById('statPending').textContent = pendingSnap.size;
-                
-            } catch (error) {
-                log('ERRORE loadStats: ' + error.message, 'error');
+            const playersSnap = await db.collection('giocatori').get();
+            document.getElementById('statTotalPlayers').textContent = playersSnap.size;
+            
+            const today = new Date().toISOString().split('T')[0];
+            const evalsSnap = await db.collection('valutazioni')
+                .where('data', '==', today).get();
+            document.getElementById('statTodayEvals').textContent = evalsSnap.size;
+            
+            const staffSnap = await db.collection('users')
+                .where('approved', '==', true).get();
+            document.getElementById('statActiveStaff').textContent = staffSnap.size;
+            
+            const pendingSnap = await db.collection('users')
+                .where('approved', '==', false).get();
+            document.getElementById('statPending').textContent = pendingSnap.size;
+            
+            if (pendingSnap.size > 0) {
+                document.getElementById('badgeApprovazioni').textContent = pendingSnap.size;
+                document.getElementById('badgeApprovazioni').classList.remove('hidden');
             }
         }
 
+        // 🔧 FUNZIONE CORRETTA - Senza orderBy che richiede indice
         async function loadPlayers() {
-            log('=== INIZIO loadPlayers() ===');
-            
             const categoria = document.getElementById('filterCat').value;
             const ruolo = document.getElementById('filterRuolo').value;
-            const search = document.getElementById('searchPlayer').value.toLowerCase().trim();
-            
-            log(`Filtri - Cat: "${categoria}", Ruolo: "${ruolo}", Search: "${search}"`);
+            const search = document.getElementById('searchPlayer').value.toLowerCase();
             
             const grid = document.getElementById('playersGrid');
+            grid.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-400">Caricamento...</div>';
             
             try {
-                // STEP 1: Carica tutti i giocatori
-                log('Query Firebase: giocatori...');
+                // ⚠️ NESSUN .orderBy() - evita l'errore di indice Firebase!
                 const snapshot = await db.collection('giocatori').get();
-                log(`Query completata. Documenti trovati: ${snapshot.size}`, 'success');
                 
-                if (snapshot.empty) {
-                    grid.innerHTML = '<div class="col-span-3 text-center py-12 text-slate-500">Nessun giocatore nel database</div>';
-                    return;
-                }
-                
-                // STEP 2: Converti in array
-                allPlayers = [];
+                let players = [];
                 snapshot.forEach(doc => {
-                    const data = doc.data();
-                    log(`Giocatore: ${doc.id} -> ${JSON.stringify(data)}`);
-                    allPlayers.push({
-                        id: doc.id,
-                        ...data
-                    });
+                    players.push({ id: doc.id, ...doc.data() });
                 });
                 
-                // STEP 3: Filtra
-                let filtered = allPlayers.filter(p => {
+                // Ordina in memoria con JavaScript
+                players.sort((a, b) => {
+                    const cognomeA = (a.cognome || '').toLowerCase();
+                    const cognomeB = (b.cognome || '').toLowerCase();
+                    if (cognomeA < cognomeB) return -1;
+                    if (cognomeA > cognomeB) return 1;
+                    const nomeA = (a.nome || '').toLowerCase();
+                    const nomeB = (b.nome || '').toLowerCase();
+                    return nomeA.localeCompare(nomeB);
+                });
+                
+                // Applica filtri
+                let filtered = players.filter(p => {
                     if (categoria && p.categoria !== categoria) return false;
                     if (ruolo && p.ruolo !== ruolo) return false;
                     if (search) {
@@ -375,103 +339,283 @@
                     return true;
                 });
                 
-                log(`Dopo filtri: ${filtered.length} giocatori`);
-                
-                // STEP 4: Mostra debug info
-                let debugHtml = `<strong>Giocatori trovati:</strong> ${allPlayers.length}<br>`;
-                debugHtml += `<strong>Dopo filtri:</strong> ${filtered.length}<br><br>`;
-                debugHtml += `<strong>Dettagli:</strong><br>`;
-                allPlayers.forEach((p, i) => {
-                    debugHtml += `${i+1}. ID:${p.id} | ${p.cognome || 'NO_COGNOME'} ${p.nome || 'NO_NOME'} | Cat:${p.categoria || 'N/D'} | Ruolo:${p.ruolo || 'N/D'}<br>`;
-                });
-                showDebugInfo(debugHtml);
-                
-                // STEP 5: Render
                 grid.innerHTML = '';
                 
                 if (filtered.length === 0) {
-                    grid.innerHTML = '<div class="col-span-3 text-center py-12 text-slate-500">Nessun giocatore corrisponde ai filtri</div>';
+                    grid.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-500">Nessun giocatore trovato</div>';
                     return;
                 }
                 
                 for (const player of filtered) {
+                    let avgScore = '--';
                     try {
-                        log(`Rendering card per: ${player.cognome} ${player.nome}`);
+                        const evals = await db.collection('valutazioni')
+                            .where('giocatore_id', '==', player.id)
+                            .limit(5)
+                            .get();
                         
-                        // Card semplificata senza query valutazioni per test
-                        const card = document.createElement('div');
-                        card.className = 'glass-panel p-6 rounded-2xl border border-slate-700 hover:border-cyan-500/50 cursor-pointer transition-all';
-                        card.onclick = () => alert('Giocatore: ' + player.cognome + ' ' + player.nome);
-                        
-                        card.innerHTML = `
+                        if (!evals.empty) {
+                            let total = 0, count = 0;
+                            evals.forEach(e => {
+                                const data = e.data();
+                                Object.keys(data).forEach(key => {
+                                    if (typeof data[key] === 'number' && key !== 'timestamp') {
+                                        total += data[key];
+                                        count++;
+                                    }
+                                });
+                            });
+                            avgScore = count > 0 ? (total / count).toFixed(1) : '--';
+                        }
+                    } catch (e) {
+                        console.log('Errore valutazioni per', player.id);
+                    }
+                    
+                    grid.innerHTML += `
+                        <div onclick="showPlayerDetail('${player.id}')" class="glass-panel p-6 rounded-2xl border border-slate-700 hover:border-cyan-500/50 cursor-pointer transition-all group">
                             <div class="flex justify-between items-start mb-4">
                                 <div>
-                                    <h3 class="font-bold text-lg text-white">${player.cognome || 'Cognome?'} ${player.nome || 'Nome?'}</h3>
+                                    <h3 class="font-bold text-lg group-hover:text-cyan-400 transition-colors">${player.cognome || 'N/D'} ${player.nome || 'N/D'}</h3>
                                     <p class="text-sm text-slate-400">${player.categoria || 'N/D'} • ${player.ruolo || 'N/D'}</p>
                                 </div>
-                                <div class="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded">ID: ${player.id.substr(0,6)}</div>
+                                <div class="text-2xl font-bold text-cyan-400 font-display">${avgScore}</div>
                             </div>
-                            <div class="text-xs text-slate-500">
-                                Nato: ${player.data_nascita || 'N/D'}
+                            <div class="flex gap-2 text-xs">
+                                <span class="px-2 py-1 bg-slate-800 rounded">${player.data_nascita || 'N/D'}</span>
                             </div>
-                        `;
-                        
-                        grid.appendChild(card);
-                        log(`Card aggiunta per ${player.cognome}`, 'success');
-                        
-                    } catch (cardError) {
-                        log(`ERRORE creazione card per ${player.id}: ${cardError.message}`, 'error');
-                    }
+                        </div>
+                    `;
                 }
                 
-                log('=== FINE loadPlayers() - SUCCESS ===', 'success');
-                
             } catch (error) {
-                log(`ERRORE CRITICO loadPlayers: ${error.message}`, 'error');
-                log(`Stack: ${error.stack}`, 'error');
-                grid.innerHTML = `<div class="col-span-3 text-center py-12 text-red-400">
-                    <strong>Errore caricamento:</strong><br>${error.message}<br>
-                    <button onclick="loadPlayers()" class="mt-4 px-4 py-2 bg-cyan-500/20 text-cyan-400 rounded">Riprova</button>
-                </div>`;
+                console.error('Errore:', error);
+                grid.innerHTML = '<div class="col-span-3 text-center py-8 text-red-400">Errore caricamento: ' + error.message + '</div>';
             }
-            
-            lucide.createIcons();
         }
 
-        function forceReload() {
-            allPlayers = [];
-            loadPlayers();
+        async function showPlayerDetail(playerId) {
+            selectedPlayerId = playerId;
+            showSection('dettaglio');
+            
+            const playerDoc = await db.collection('giocatori').doc(playerId).get();
+            const p = playerDoc.data();
+            
+            document.getElementById('detailName').textContent = `${p.cognome} ${p.nome}`;
+            document.getElementById('detailInfo').textContent = `${p.categoria} • ${p.ruolo} • Nato il ${p.data_nascita}`;
+            
+            const evals = await db.collection('valutazioni')
+                .where('giocatore_id', '==', playerId)
+                .get();
+            
+            let totalScore = 0, count = 0;
+            const history = [];
+            const skillCategories = { tecnica: [], cognitiva: [], fisica: [], psicologica: [] };
+            
+            evals.forEach(doc => {
+                const v = doc.data();
+                history.push(v);
+                
+                if (skillCategories[v.tipo]) {
+                    let sum = 0, num = 0;
+                    Object.keys(v).forEach(key => {
+                        if (typeof v[key] === 'number' && !['timestamp', 'giocatore_id'].includes(key)) {
+                            sum += v[key];
+                            num++;
+                        }
+                    });
+                    if (num > 0) skillCategories[v.tipo].push(sum / num);
+                }
+            });
+            
+            const radarData = [
+                skillCategories.tecnica.length > 0 ? 
+                    skillCategories.tecnica.reduce((a,b) => a+b) / skillCategories.tecnica.length : 0,
+                skillCategories.cognitiva.length > 0 ? 
+                    skillCategories.cognitiva.reduce((a,b) => a+b) / skillCategories.cognitiva.length : 0,
+                skillCategories.fisica.length > 0 ? 
+                    skillCategories.fisica.reduce((a,b) => a+b) / skillCategories.fisica.length : 0,
+                skillCategories.psicologica.length > 0 ? 
+                    skillCategories.psicologica.reduce((a,b) => a+b) / skillCategories.psicologica.length : 0
+            ];
+            
+            const globalAvg = radarData.reduce((a,b) => a+b) / radarData.filter(x => x > 0).length || 0;
+            document.getElementById('detailScore').textContent = globalAvg > 0 ? globalAvg.toFixed(1) : '--';
+            
+            const histContainer = document.getElementById('detailHistory');
+            histContainer.innerHTML = '';
+            history.slice(0, 20).forEach(h => {
+                histContainer.innerHTML += `
+                    <div class="p-3 bg-slate-800/30 rounded-lg border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <span class="capitalize font-semibold text-cyan-400">${h.tipo}</span>
+                            <span class="text-slate-400 text-sm ml-2">${h.data} • ${h.sessione}</span>
+                        </div>
+                        <span class="text-xs text-slate-500">${h.timestamp ? new Date(h.timestamp.toDate()).toLocaleDateString() : ''}</span>
+                    </div>
+                `;
+            });
+            
+            createCharts(radarData, history);
+        }
+
+        function createCharts(radarData, history) {
+            const radarCtx = document.getElementById('radarChart').getContext('2d');
+            if (radarChartInstance) radarChartInstance.destroy();
+            
+            radarChartInstance = new Chart(radarCtx, {
+                type: 'radar',
+                data: {
+                    labels: ['Tecnica', 'Cognitiva', 'Fisica', 'Psicologica'],
+                    datasets: [{
+                        label: 'Media Competenze',
+                        data: radarData,
+                        backgroundColor: 'rgba(0, 245, 212, 0.2)',
+                        borderColor: '#00f5d4',
+                        borderWidth: 2
+                    }]
+                },
+                options: {
+                    scales: {
+                        r: {
+                            beginAtZero: true,
+                            max: 10,
+                            grid: { color: 'rgba(255,255,255,0.1)' },
+                            angleLines: { color: 'rgba(255,255,255,0.1)' },
+                            pointLabels: { color: 'white' }
+                        }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+            
+            const trendCtx = document.getElementById('trendChart').getContext('2d');
+            if (trendChartInstance) trendChartInstance.destroy();
+            
+            const recentScores = history.slice(0, 6).reverse().map(h => {
+                let sum = 0, count = 0;
+                Object.keys(h).forEach(key => {
+                    if (typeof h[key] === 'number' && !['timestamp', 'giocatore_id'].includes(key)) {
+                        sum += h[key];
+                        count++;
+                    }
+                });
+                return count > 0 ? (sum / count).toFixed(1) : 0;
+            });
+            
+            trendChartInstance = new Chart(trendCtx, {
+                type: 'line',
+                data: {
+                    labels: recentScores.map((_, i) => `Val ${i+1}`),
+                    datasets: [{
+                        label: 'Andamento',
+                        data: recentScores,
+                        borderColor: '#00bbf9',
+                        backgroundColor: 'rgba(0, 187, 249, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: { beginAtZero: true, max: 10, grid: { color: 'rgba(255,255,255,0.1)' } },
+                        x: { grid: { display: false } }
+                    },
+                    plugins: { legend: { display: false } }
+                }
+            });
+        }
+
+        async function loadPendingApprovals() {
+            const snapshot = await db.collection('users')
+                .where('approved', '==', false)
+                .get();
+            
+            const container = document.getElementById('pendingApprovals');
+            container.innerHTML = '';
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<p class="text-slate-400 text-center py-8">Nessuna richiesta pendente</p>';
+                return;
+            }
+            
+            snapshot.forEach(doc => {
+                const u = doc.data();
+                container.innerHTML += `
+                    <div class="glass-panel p-6 rounded-2xl border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-lg">${u.name}</div>
+                            <div class="text-sm text-slate-400">${u.email} • ${u.role}</div>
+                            <div class="text-xs text-slate-500 mt-1">Registrato il ${u.createdAt ? new Date(u.createdAt.toDate()).toLocaleDateString() : ''}</div>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="approveUser('${doc.id}', true)" 
+                                class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30 transition-colors">
+                                Approva
+                            </button>
+                            <button onclick="approveUser('${doc.id}', false)" 
+                                class="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30 transition-colors">
+                                Rifiuta
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function approveUser(userId, approve) {
+            if (approve) {
+                await db.collection('users').doc(userId).update({ approved: true });
+            } else {
+                await db.collection('users').doc(userId).delete();
+            }
+            loadPendingApprovals();
+            loadStats();
         }
 
         document.getElementById('addPlayerForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            try {
-                const newPlayer = {
-                    nome: document.getElementById('newNome').value.trim(),
-                    cognome: document.getElementById('newCognome').value.trim(),
-                    data_nascita: document.getElementById('newDataNascita').value,
-                    categoria: document.getElementById('newCategoria').value,
-                    ruolo: document.getElementById('newRuolo').value,
-                    created_at: firebase.firestore.FieldValue.serverTimestamp()
-                };
-                
-                log('Aggiunta giocatore: ' + JSON.stringify(newPlayer));
-                await db.collection('giocatori').add(newPlayer);
-                
-                alert('Giocatore aggiunto!');
-                e.target.reset();
-                loadPlayers();
-                
-            } catch (error) {
-                log('ERRORE aggiunta: ' + error.message, 'error');
-                alert('Errore: ' + error.message);
-            }
+            const newPlayer = {
+                nome: document.getElementById('newNome').value,
+                cognome: document.getElementById('newCognome').value,
+                data_nascita: document.getElementById('newDataNascita').value,
+                categoria: document.getElementById('newCategoria').value,
+                ruolo: document.getElementById('newRuolo').value,
+                created_at: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            await db.collection('giocatori').add(newPlayer);
+            alert('Giocatore aggiunto con successo!');
+            e.target.reset();
+            loadStats();
+            loadPlayers();
         });
 
-        // Inizializza
+        async function exportData() {
+            const players = await db.collection('giocatori').get();
+            const evals = await db.collection('valutazioni').get();
+            
+            let csv = 'Tipo,ID,Nome,Cognome,Categoria,Ruolo,Data\n';
+            
+            players.forEach(doc => {
+                const p = doc.data();
+                csv += `Giocatore,${doc.id},${p.nome},${p.cognome},${p.categoria},${p.ruolo},${p.data_nascita}\n`;
+            });
+            
+            evals.forEach(doc => {
+                const v = doc.data();
+                csv += `Valutazione,${doc.id},${v.giocatore_id},${v.tipo},${v.data},${v.sessione},${v.note || ''}\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `sincro_export_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+        }
+
         lucide.createIcons();
-        log('Pagina caricata. In attesa di autenticazione...');
     </script>
 </body>
 </html>
