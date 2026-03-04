@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valutazione Psicologo - S.I.N.C.R.O.</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Inter:wght@300;400;600;800&display=swap');
+        * { font-family: 'Inter', sans-serif; }
+        .font-display { font-family: 'Space Grotesk', sans-serif; }
+        
+        .glass-panel {
+            background: rgba(15, 23, 42, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        input[type="range"] {
+            -webkit-appearance: none;
+            width: 100%;
+            height: 8px;
+            border-radius: 5px;
+            background: #334155;
+            outline: none;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #a855f7;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-white min-h-screen">
+    
+    <nav class="glass-panel border-b border-slate-700/50 sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-br from-purple-400 to-pink-600 flex items-center justify-center">
+                        <i data-lucide="brain" class="w-4 h-4 text-white"></i>
+                    </div>
+                    <span class="font-display font-bold text-xl">S.I.N.C.R.O. <span class="text-purple-400">PSICOLOGO</span></span>
+                </div>
+                <div class="flex items-center gap-4">
+                    <span id="userName" class="text-sm text-slate-400"></span>
+                    <button onclick="logout()" class="text-red-400 hover:text-red-300 text-sm flex items-center gap-1">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="max-w-7xl mx-auto px-4 py-8">
+        
+        <!-- Selezione Tipo Valutazione -->
+        <div id="selezioneTipo" class="glass-panel p-6 rounded-2xl border border-slate-700 mb-6">
+            <h2 class="text-xl font-bold mb-4">Seleziona Tipo Valutazione</h2>
+            <div class="grid md:grid-cols-2 gap-4">
+                <button onclick="selezionaTipo('allenatore')" class="glass-panel p-6 rounded-xl border border-slate-700 hover:border-purple-500/50 transition-all text-left">
+                    <i data-lucide="user" class="w-8 h-8 text-purple-400 mb-3"></i>
+                    <h3 class="font-bold text-lg">Valuta Allenatore</h3>
+                    <p class="text-sm text-slate-400">Competenza psicologiche del mister</p>
+                </button>
+                <button onclick="selezionaTipo('giocatore')" class="glass-panel p-6 rounded-xl border border-slate-700 hover:border-purple-500/50 transition-all text-left">
+                    <i data-lucide="users" class="w-8 h-8 text-cyan-400 mb-3"></i>
+                    <h3 class="font-bold text-lg">Valuta Giocatore</h3>
+                    <p class="text-sm text-slate-400">Aspetti psicologici del giocatore</p>
+                </button>
+            </div>
+        </div>
+
+        <!-- Selezione Allenatore -->
+        <div id="selezioneAllenatore" class="hidden glass-panel p-6 rounded-2xl border border-slate-700 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Seleziona Allenatore</h2>
+                <button onclick="tornaATipo()" class="text-slate-400 hover:text-white text-sm">← Indietro</button>
+            </div>
+            <div id="listaAllenatori" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="col-span-3 text-center py-8 text-slate-400">Caricamento...</div>
+            </div>
+        </div>
+
+        <!-- Selezione Giocatore -->
+        <div id="selezioneGiocatore" class="hidden glass-panel p-6 rounded-2xl border border-slate-700 mb-6">
+            <div class="flex justify-between items-center mb-4">
+                <h2 class="text-xl font-bold">Seleziona Giocatore</h2>
+                <button onclick="tornaATipo()" class="text-slate-400 hover:text-white text-sm">← Indietro</button>
+            </div>
+            <div id="listaGiocatori" class="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="col-span-3 text-center py-8 text-slate-400">Caricamento...</div>
+            </div>
+        </div>
+
+        <!-- Form Valutazione Allenatore -->
+        <div id="formValutazioneAllenatore" class="hidden glass-panel p-6 rounded-2xl border border-slate-700">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-xl font-bold">Valutazione Psicologica - Allenatore</h2>
+                    <p id="nomeAllenatoreSelezionato" class="text-purple-400"></p>
+                </div>
+                <button onclick="tornaALista()" class="text-slate-400 hover:text-white">
+                    <i data-lucide="arrow-left" class="w-5 h-5 inline mr-1"></i> Torna indietro
+                </button>
+            </div>
+
+            <form id="formAllenatore" class="space-y-6">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">Data Valutazione</label>
+                    <input type="date" id="dataValutazioneAll" required 
+                        class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white w-full md:w-auto">
+                </div>
+
+                <!-- Stile Cognitivo -->
+                <div class="border-t border-slate-700 pt-6">
+                    <h3 class="font-semibold mb-4 text-purple-400">Stile Cognitivo</h3>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm mb-2">Deduttivo/Induttivo</label>
+                            <select name="stile_cognitivo" required class="w-full px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
+                                <option value="">Seleziona</option>
+                                <option value="deduttivo">Deduttivo</option>
+                                <option value="induttivo">Induttivo</option>
+                                <option value="misto">Misto</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block text-sm mb-2">Prescrittivo</label>
+                            <select name="prescrittivo" required class="w-full px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
+                                <option value="">Seleziona</option>
+                                <option value="alto">Alto</option>
+                                <option value="medio">Medio</option>
+                                <option value="basso">Basso</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Competenze Psicologiche (1-10) -->
+                <div class="border-t border-slate-700 pt-6">
+                    <h3 class="font-semibold mb-4 text-purple-400">Competenze Psicologiche</h3>
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="block text-sm">Accetta l'errore del giocatore</label>
+                            <input type="range" name="accetta_errore" min="1" max="10" value="5" 
+                                oninput="document.getElementById('val-accetta').textContent = this.value">
+                            <div class="flex justify-between text-xs text-slate-500">
+                                <span>1</span>
+                                <span id="val-accetta" class="text-purple-400 font-bold">5</span>
+                                <span>10</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm">Stimola positivamente</label>
+                            <input type="range" name="stimola_positivamente" min="1" max="10" value="5"
+                                oninput="document.getElementById('val-stimola').textContent = this.value">
+                            <div class="flex justify-between text-xs text-slate-500">
+                                <span>1</span>
+                                <span id="val-stimola" class="text-purple-400 font-bold">5</span>
+                                <span>10</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm">Fornisce feedback positivi specifici</label>
+                            <input type="range" name="feedback_specifici" min="1" max="10" value="5"
+                                oninput="document.getElementById('val-feedback').textContent = this.value">
+                            <div class="flex justify-between text-xs text-slate-500">
+                                <span>1</span>
+                                <span id="val-feedback" class="text-purple-400 font-bold">5</span>
+                                <span>10</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm">Crea un ambiente sereno</label>
+                            <input type="range" name="ambiente_sereno" min="1" max="10" value="5"
+                                oninput="document.getElementById('val-ambiente').textContent = this.value">
+                            <div class="flex justify-between text-xs text-slate-500">
+                                <span>1</span>
+                                <span id="val-ambiente" class="text-purple-400 font-bold">5</span>
+                                <span>10</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm">È inclusivo</label>
+                            <input type="range" name="inclusivo" min="1" max="10" value="5"
+                                oninput="document.getElementById('val-inclusivo').textContent = this.value">
+                            <div class="flex justify-between text-xs text-slate-500">
+                                <span>1</span>
+                                <span id="val-inclusivo" class="text-purple-400 font-bold">5</span>
+                                <span>10</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm">È aperto al dialogo</label>
+                            <input type="range" name="aperto_dialogo" min="1" max="10" value="5"
+                                oninput="document.getElementById('val-dialogo').textContent = this.value">
+                            <div class="flex justify-between text-xs text-slate-500">
+                                <span>1</span>
+                                <span id="val-dialogo" class="text-purple-400 font-bold">5</span>
+                                <span>10</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Note -->
+                <div class="border-t border-slate-700 pt-6">
+                    <label class="block text-sm text-slate-400 mb-2">Osservazioni</label>
+                    <textarea name="note" rows="3" 
+                        class="w-full px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white"
+                        placeholder="Osservazioni sullo stile di coaching..."></textarea>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="flex-1 py-3 bg-purple-500 text-white rounded-lg font-bold hover:bg-purple-600 transition-colors">
+                        Salva Valutazione
+                    </button>
+                    <button type="button" onclick="tornaALista()" class="px-6 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors">
+                        Annulla
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Form Valutazione Giocatore -->
+        <div id="formValutazioneGiocatore" class="hidden glass-panel p-6 rounded-2xl border border-slate-700">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h2 class="text-xl font-bold">Valutazione Psicologica - Giocatore</h2>
+                    <p id="nomeGiocatoreSelezionato" class="text-cyan-400"></p>
+                </div>
+                <button onclick="tornaALista()" class="text-slate-400 hover:text-white">
+                    <i data-lucide="arrow-left" class="w-5 h-5 inline mr-1"></i> Torna indietro
+                </button>
+            </div>
+
+            <form id="formGiocatore" class="space-y-6">
+                <div>
+                    <label class="block text-sm text-slate-400 mb-2">Data Valutazione</label>
+                    <input type="date" id="dataValutazioneGioc" required 
+                        class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white w-full md:w-auto">
+                </div>
+
+                <div class="border-t border-slate-700 pt-6">
+                    <h3 class="font-semibold mb-4 text-cyan-400">Aspetti Psicologici (da definire)</h3>
+                    <p class="text-slate-400 text-sm mb-4">Placeholder per future valutazioni psicologiche del giocatore</p>
+                    
+                    <div class="space-y-4">
+                        <div class="space-y-2">
+                            <label class="block text-sm">Motivazione</label>
+                            <input type="range" name="motivazione" min="1" max="10" value="5" 
+                                oninput="document.getElementById('val-motivazione').textContent = this.value">
+                            <div class="flex justify-between text-xs text-slate-500">
+                                <span>1</span>
+                                <span id="val-motivazione" class="text-cyan-400 font-bold">5</span>
+                                <span>10</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm">Gestione dello stress</label>
+                            <input type="range" name="gestione_stress" min="1" max="10" value="5"
+                                oninput="document.getElementById('val-stress').textContent = this.value">
+                            <div class="flex justify-between text-xs text-slate-500">
+                                <span>1</span>
+                                <span id="val-stress" class="text-cyan-400 font-bold">5</span>
+                                <span>10</span>
+                            </div>
+                        </div>
+
+                        <div class="space-y-2">
+                            <label class="block text-sm">Lavoro di squadra</label>
+                            <input type="range" name="lavoro_squadra" min="1" max="10" value="5"
+                                oninput="document.getElementById('val-squadra').textContent = this.value">
+                            <div class="flex justify-between text-xs text-slate-500">
+                                <span>1</span>
+                                <span id="val-squadra" class="text-cyan-400 font-bold">5</span>
+                                <span>10</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="border-t border-slate-700 pt-6">
+                    <label class="block text-sm text-slate-400 mb-2">Osservazioni</label>
+                    <textarea name="note" rows="3" 
+                        class="w-full px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white"
+                        placeholder="Osservazioni sul profilo psicologico..."></textarea>
+                </div>
+
+                <div class="flex gap-4 pt-4">
+                    <button type="submit" class="flex-1 py-3 bg-cyan-500 text-slate-900 rounded-lg font-bold hover:bg-cyan-400 transition-colors">
+                        Salva Valutazione
+                    </button>
+                    <button type="button" onclick="tornaALista()" class="px-6 py-3 bg-slate-700 text-white rounded-lg hover:bg-slate-600 transition-colors">
+                        Annulla
+                    </button>
+                </div>
+            </form>
+        </div>
+
+    </div>
+
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyAlksSPuBgbYgzZmtUk3jYJMMtXEBCgM94",
+            authDomain: "sincro-academy.firebaseapp.com",
+            projectId: "sincro-academy",
+            storageBucket: "sincro-academy.firebasestorage.app",
+            messagingSenderId: "139698272933",
+            appId: "1:139698272933:web:c4307e00b69757766beb4c",
+            measurementId: "G-CD4QB2ZXRS"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        let currentUser = null;
+        let tipoValutazione = null;
+        let selectedSubjectId = null;
+        let selectedSubjectData = null;
+
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            try {
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (!userDoc.exists || userDoc.data().role !== 'psicologo') {
+                    alert('Accesso riservato ai psicologi');
+                    await auth.signOut();
+                    window.location.href = 'login.html';
+                    return;
+                }
+
+                currentUser = user;
+                document.getElementById('userName').textContent = userDoc.data().name || user.email;
+                
+                document.getElementById('dataValutazioneAll').valueAsDate = new Date();
+                document.getElementById('dataValutazioneGioc').valueAsDate = new Date();
+                
+            } catch (error) {
+                console.error('Errore auth:', error);
+            }
+        });
+
+        function logout() {
+            auth.signOut().then(() => window.location.href = 'login.html');
+        }
+
+        function selezionaTipo(tipo) {
+            tipoValutazione = tipo;
+            document.getElementById('selezioneTipo').classList.add('hidden');
+            
+            if (tipo === 'allenatore') {
+                document.getElementById('selezioneAllenatore').classList.remove('hidden');
+                loadAllenatori();
+            } else {
+                document.getElementById('selezioneGiocatore').classList.remove('hidden');
+                loadGiocatori();
+            }
+        }
+
+        function tornaATipo() {
+            tipoValutazione = null;
+            document.getElementById('selezioneAllenatore').classList.add('hidden');
+            document.getElementById('selezioneGiocatore').classList.add('hidden');
+            document.getElementById('selezioneTipo').classList.remove('hidden');
+        }
+
+        async function loadAllenatori() {
+            const container = document.getElementById('listaAllenatori');
+            container.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-400">Caricamento...</div>';
+
+            try {
+                const snapshot = await db.collection('users')
+                    .where('role', '==', 'allenatore')
+                    .where('approved', '==', true)
+                    .get();
+
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-500">Nessun allenatore trovato</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const a = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'glass-panel p-4 rounded-xl border border-slate-700 hover:border-purple-500/50 cursor-pointer transition-all';
+                    card.onclick = () => selezionaSubject(doc.id, a, 'allenatore');
+                    
+                    card.innerHTML = `
+                        <h3 class="font-bold text-lg">${a.name || 'N/D'}</h3>
+                        <p class="text-sm text-slate-400">${a.email || ''}</p>
+                        <p class="text-xs text-purple-400 mt-2">${a.categoria || 'N/D'}</p>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                container.innerHTML = `<div class="col-span-3 text-center py-8 text-red-400">Errore: ${error.message}</div>`;
+            }
+            lucide.createIcons();
+        }
+
+        async function loadGiocatori() {
+            const container = document.getElementById('listaGiocatori');
+            container.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-400">Caricamento...</div>';
+
+            try {
+                const snapshot = await db.collection('giocatori').get();
+
+                if (snapshot.empty) {
+                    container.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-500">Nessun giocatore trovato</div>';
+                    return;
+                }
+
+                container.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const g = doc.data();
+                    const card = document.createElement('div');
+                    card.className = 'glass-panel p-4 rounded-xl border border-slate-700 hover:border-cyan-500/50 cursor-pointer transition-all';
+                    card.onclick = () => selezionaSubject(doc.id, g, 'giocatore');
+                    
+                    card.innerHTML = `
+                        <h3 class="font-bold text-lg">${g.cognome || ''} ${g.nome || ''}</h3>
+                        <p class="text-sm text-slate-400">${g.ruolo || 'N/D'} • ${g.categoria || 'N/D'}</p>
+                    `;
+                    container.appendChild(card);
+                });
+            } catch (error) {
+                container.innerHTML = `<div class="col-span-3 text-center py-8 text-red-400">Errore: ${error.message}</div>`;
+            }
+            lucide.createIcons();
+        }
+
+        function selezionaSubject(id, data, tipo) {
+            selectedSubjectId = id;
+            selectedSubjectData = data;
+            
+            document.getElementById('selezioneAllenatore').classList.add('hidden');
+            document.getElementById('selezioneGiocatore').classList.add('hidden');
+            
+            if (tipo === 'allenatore') {
+                document.getElementById('nomeAllenatoreSelezionato').textContent = data.name || 'N/D';
+                document.getElementById('formValutazioneAllenatore').classList.remove('hidden');
+            } else {
+                document.getElementById('nomeGiocatoreSelezionato').textContent = `${data.cognome || ''} ${data.nome || ''}`;
+                document.getElementById('formValutazioneGiocatore').classList.remove('hidden');
+            }
+        }
+
+        function tornaALista() {
+            selectedSubjectId = null;
+            selectedSubjectData = null;
+            document.getElementById('formValutazioneAllenatore').classList.add('hidden');
+            document.getElementById('formValutazioneGiocatore').classList.add('hidden');
+            
+            if (tipoValutazione === 'allenatore') {
+                document.getElementById('selezioneAllenatore').classList.remove('hidden');
+            } else {
+                document.getElementById('selezioneGiocatore').classList.remove('hidden');
+            }
+        }
+
+        // Form Allenatore
+        document.getElementById('formAllenatore').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await salvaValutazione('allenatore', selectedSubjectId, selectedSubjectData);
+        });
+
+        // Form Giocatore
+        document.getElementById('formGiocatore').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await salvaValutazione('giocatore', selectedSubjectId, selectedSubjectData);
+        });
+
+        async function salvaValutazione(tipo, subjectId, subjectData) {
+            const form = tipo === 'allenatore' ? document.getElementById('formAllenatore') : document.getElementById('formGiocatore');
+            const submitBtn = form.querySelector('button[type="submit"]');
+            submitBtn.textContent = 'Salvataggio...';
+            submitBtn.disabled = true;
+
+            try {
+                const formData = new FormData(form);
+                const valutazione = {
+                    psicologo_id: currentUser.uid,
+                    psicologo_nome: document.getElementById('userName').textContent,
+                    tipo_valutazione: tipo,
+                    subject_id: subjectId,
+                    subject_nome: tipo === 'allenatore' ? subjectData.name : `${subjectData.cognome} ${subjectData.nome}`,
+                    data: tipo === 'allenatore' ? document.getElementById('dataValutazioneAll').value : document.getElementById('dataValutazioneGioc').value,
+                    timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+                    note: formData.get('note') || ''
+                };
+
+                if (tipo === 'allenatore') {
+                    valutazione.stile_cognitivo = formData.get('stile_cognitivo');
+                    valutazione.prescrittivo = formData.get('prescrittivo');
+                    valutazione.accetta_errore = parseInt(formData.get('accetta_errore'));
+                    valutazione.stimola_positivamente = parseInt(formData.get('stimola_positivamente'));
+                    valutazione.feedback_specifici = parseInt(formData.get('feedback_specifici'));
+                    valutazione.ambiente_sereno = parseInt(formData.get('ambiente_sereno'));
+                    valutazione.inclusivo = parseInt(formData.get('inclusivo'));
+                    valutazione.aperto_dialogo = parseInt(formData.get('aperto_dialogo'));
+                } else {
+                    valutazione.motivazione = parseInt(formData.get('motivazione'));
+                    valutazione.gestione_stress = parseInt(formData.get('gestione_stress'));
+                    valutazione.lavoro_squadra = parseInt(formData.get('lavoro_squadra'));
+                }
+
+                await db.collection('valutazioni_psicologiche').add(valutazione);
+                
+                alert('Valutazione salvata con successo!');
+                form.reset();
+                tornaALista();
+                
+            } catch (error) {
+                console.error('Errore:', error);
+                alert('Errore durante il salvataggio: ' + error.message);
+            } finally {
+                submitBtn.textContent = 'Salva Valutazione';
+                submitBtn.disabled = false;
+            }
+        }
+
+        lucide.createIcons();
+    </script>
+</body>
+</html>
