@@ -9,6 +9,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;600;700&family=Inter:wght@300;400;600;800&display=swap');
@@ -20,10 +21,17 @@
             backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.1);
         }
+        
+        .gradient-text {
+            background: linear-gradient(135deg, #00f5d4 0%, #00bbf9 50%, #fee440 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
     </style>
 </head>
 <body class="bg-slate-900 text-white min-h-screen">
     
+    <!-- Header -->
     <nav class="glass-panel border-b border-slate-700/50 sticky top-0 z-50">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex justify-between items-center h-16">
@@ -34,6 +42,10 @@
                     <span class="font-display font-bold text-xl">S.I.N.C.R.O. <span class="text-cyan-400">ADMIN</span></span>
                 </div>
                 <div class="flex items-center gap-4">
+                    <button onclick="showSection('approvazioni')" class="relative p-2 text-slate-400 hover:text-white">
+                        <i data-lucide="bell" class="w-5 h-5"></i>
+                        <span id="badgeApprovazioni" class="absolute top-0 right-0 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center hidden">0</span>
+                    </button>
                     <span class="text-sm text-slate-400">Amministratore</span>
                     <button onclick="logout()" class="text-red-400 hover:text-red-300 text-sm flex items-center gap-1">
                         <i data-lucide="log-out" class="w-4 h-4"></i>
@@ -45,10 +57,11 @@
 
     <div class="max-w-7xl mx-auto px-4 py-8">
         
-        <div class="grid md:grid-cols-4 gap-6 mb-8">
+        <!-- Stats Overview -->
+        <div class="grid md:grid-cols-5 gap-4 mb-8">
             <div class="glass-panel p-6 rounded-2xl border border-cyan-500/30">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-slate-400 text-sm">Totale Giocatori</span>
+                    <span class="text-slate-400 text-sm">Giocatori</span>
                     <i data-lucide="users" class="w-5 h-5 text-cyan-400"></i>
                 </div>
                 <div class="text-3xl font-bold font-display" id="statTotalPlayers">0</div>
@@ -56,10 +69,18 @@
             
             <div class="glass-panel p-6 rounded-2xl border border-purple-500/30">
                 <div class="flex items-center justify-between mb-2">
-                    <span class="text-slate-400 text-sm">Valutazioni Oggi</span>
+                    <span class="text-slate-400 text-sm">Val. Tecniche</span>
                     <i data-lucide="clipboard-check" class="w-5 h-5 text-purple-400"></i>
                 </div>
-                <div class="text-3xl font-bold font-display" id="statTodayEvals">0</div>
+                <div class="text-3xl font-bold font-display" id="statValTecniche">0</div>
+            </div>
+            
+            <div class="glass-panel p-6 rounded-2xl border border-pink-500/30">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-slate-400 text-sm">Val. Psicologiche</span>
+                    <i data-lucide="brain" class="w-5 h-5 text-pink-400"></i>
+                </div>
+                <div class="text-3xl font-bold font-display" id="statValPsicologiche">0</div>
             </div>
             
             <div class="glass-panel p-6 rounded-2xl border border-green-500/30">
@@ -79,26 +100,151 @@
             </div>
         </div>
 
-        <div class="glass-panel p-4 rounded-2xl border border-slate-700 flex gap-4 flex-wrap mb-6">
-            <select id="filterCat" onchange="loadPlayers()" class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600">
-                <option value="">Tutte le categorie</option>
-                <option value="E1">Esordienti 1°</option>
-                <option value="E2">Esordienti 2°</option>
-                <option value="G1">Giovanissimi 1°</option>
-            </select>
-            <select id="filterRuolo" onchange="loadPlayers()" class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600">
-                <option value="">Tutti i ruoli</option>
-                <option value="Portiere">Portiere</option>
-                <option value="Difensore">Difensore</option>
-                <option value="Centrocampista">Centrocampista</option>
-                <option value="Attaccante">Attaccante</option>
-            </select>
-            <input type="text" id="searchPlayer" placeholder="Cerca giocatore..." onkeyup="loadPlayers()"
-                class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600 flex-1 min-w-[200px]">
+        <!-- Navigation Tabs -->
+        <div class="flex gap-2 mb-8 overflow-x-auto pb-2">
+            <button onclick="showSection('dashboard')" id="nav-dashboard" class="px-6 py-3 rounded-full bg-cyan-500/20 text-cyan-400 font-semibold whitespace-nowrap">
+                Dashboard Giocatori
+            </button>
+            <button onclick="showSection('valutazioni')" id="nav-valutazioni" class="px-6 py-3 rounded-full bg-slate-800 text-slate-400 font-semibold whitespace-nowrap hover:text-white">
+                Tutte le Valutazioni
+            </button>
+            <button onclick="showSection('staff')" id="nav-staff" class="px-6 py-3 rounded-full bg-slate-800 text-slate-400 font-semibold whitespace-nowrap hover:text-white">
+                Staff & Psicologi
+            </button>
+            <button onclick="showSection('approvazioni')" id="nav-approvazioni" class="px-6 py-3 rounded-full bg-slate-800 text-slate-400 font-semibold whitespace-nowrap hover:text-white">
+                Approvazioni
+            </button>
+            <button onclick="showSection('database')" id="nav-database" class="px-6 py-3 rounded-full bg-slate-800 text-slate-400 font-semibold whitespace-nowrap hover:text-white">
+                Database
+            </button>
         </div>
 
-        <div id="playersGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div class="col-span-3 text-center py-8 text-slate-400">Caricamento...</div>
+        <!-- SECTION: Dashboard Giocatori -->
+        <div id="section-dashboard" class="space-y-6">
+            <div class="glass-panel p-4 rounded-2xl border border-slate-700 flex gap-4 flex-wrap">
+                <select id="filterCat" onchange="loadPlayers()" class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600">
+                    <option value="">Tutte le categorie</option>
+                    <option value="E1">Esordienti 1°</option>
+                    <option value="E2">Esordienti 2°</option>
+                    <option value="G1">Giovanissimi 1°</option>
+                </select>
+                <select id="filterRuolo" onchange="loadPlayers()" class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600">
+                    <option value="">Tutti i ruoli</option>
+                    <option value="Portiere">Portiere</option>
+                    <option value="Difensore">Difensore</option>
+                    <option value="Centrocampista">Centrocampista</option>
+                    <option value="Attaccante">Attaccante</option>
+                </select>
+                <input type="text" id="searchPlayer" placeholder="Cerca giocatore..." onkeyup="loadPlayers()"
+                    class="px-4 py-2 bg-slate-800 rounded-lg text-white border border-slate-600 flex-1 min-w-[200px]">
+            </div>
+
+            <div id="playersGrid" class="grid md:grid-cols-2 lg:grid-cols-3 gap-6"></div>
+        </div>
+
+        <!-- SECTION: Tutte le Valutazioni -->
+        <div id="section-valutazioni" class="hidden space-y-6">
+            <div class="flex gap-4 mb-4">
+                <button onclick="showValutazioniTab('tecniche')" id="tab-val-tecniche" class="px-4 py-2 rounded-full bg-purple-500/20 text-purple-400 font-semibold">
+                    Valutazioni Tecniche
+                </button>
+                <button onclick="showValutazioniTab('psicologiche')" id="tab-val-psicologiche" class="px-4 py-2 rounded-full bg-slate-800 text-slate-400 font-semibold hover:text-white">
+                    Valutazioni Psicologiche
+                </button>
+            </div>
+
+            <!-- Valutazioni Tecniche -->
+            <div id="val-tecniche-content" class="glass-panel p-6 rounded-2xl border border-slate-700">
+                <h3 class="font-semibold mb-4 text-purple-400">Valutazioni Tecniche Giocatori</h3>
+                <div id="listaValTecniche" class="space-y-2 max-h-96 overflow-y-auto">
+                    <p class="text-slate-500">Caricamento...</p>
+                </div>
+            </div>
+
+            <!-- Valutazioni Psicologiche -->
+            <div id="val-psicologiche-content" class="hidden glass-panel p-6 rounded-2xl border border-slate-700">
+                <h3 class="font-semibold mb-4 text-pink-400">Valutazioni Psicologiche</h3>
+                <div class="flex gap-4 mb-4">
+                    <button onclick="showPsicoSubTab('allenatori')" id="subtab-allenatori" class="text-sm px-3 py-1 rounded bg-pink-500/20 text-pink-400">Allenatori</button>
+                    <button onclick="showPsicoSubTab('giocatori')" id="subtab-giocatori" class="text-sm px-3 py-1 rounded bg-slate-800 text-slate-400 hover:text-white">Giocatori</button>
+                </div>
+                <div id="listaValPsicologiche" class="space-y-2 max-h-96 overflow-y-auto">
+                    <p class="text-slate-500">Caricamento...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: Staff & Psicologi -->
+        <div id="section-staff" class="hidden space-y-6">
+            <div class="grid md:grid-cols-2 gap-6">
+                <!-- Allenatori -->
+                <div class="glass-panel p-6 rounded-2xl border border-slate-700">
+                    <h3 class="font-semibold mb-4 text-cyan-400 flex items-center gap-2">
+                        <i data-lucide="users" class="w-5 h-5"></i> Allenatori
+                    </h3>
+                    <div id="listaAllenatori" class="space-y-2 max-h-96 overflow-y-auto">
+                        <p class="text-slate-500">Caricamento...</p>
+                    </div>
+                </div>
+
+                <!-- Psicologi -->
+                <div class="glass-panel p-6 rounded-2xl border border-slate-700">
+                    <h3 class="font-semibold mb-4 text-pink-400 flex items-center gap-2">
+                        <i data-lucide="brain" class="w-5 h-5"></i> Psicologi
+                    </h3>
+                    <div id="listaPsicologi" class="space-y-2 max-h-96 overflow-y-auto">
+                        <p class="text-slate-500">Caricamento...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION: Approvazioni -->
+        <div id="section-approvazioni" class="hidden space-y-4">
+            <h2 class="font-display text-2xl font-bold mb-6">Richieste di Accesso Pendenti</h2>
+            <div id="pendingApprovals" class="space-y-4"></div>
+        </div>
+
+        <!-- SECTION: Database -->
+        <div id="section-database" class="hidden space-y-6">
+            <div class="flex justify-between items-center">
+                <h2 class="font-display text-2xl font-bold">Gestione Database</h2>
+                <div class="flex gap-2">
+                    <button onclick="exportData('tecniche')" class="px-4 py-2 bg-purple-500/20 text-purple-400 rounded-lg hover:bg-purple-500/30">
+                        <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+                        Export Val. Tecniche
+                    </button>
+                    <button onclick="exportData('psicologiche')" class="px-4 py-2 bg-pink-500/20 text-pink-400 rounded-lg hover:bg-pink-500/30">
+                        <i data-lucide="download" class="w-4 h-4 inline mr-2"></i>
+                        Export Val. Psicologiche
+                    </button>
+                </div>
+            </div>
+            
+            <div class="glass-panel p-6 rounded-2xl border border-slate-700">
+                <h3 class="font-semibold mb-4">Aggiungi Nuovo Giocatore</h3>
+                <form id="addPlayerForm" class="grid md:grid-cols-2 gap-4">
+                    <input type="text" id="newNome" placeholder="Nome" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
+                    <input type="text" id="newCognome" placeholder="Cognome" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
+                    <input type="date" id="newDataNascita" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
+                    <select id="newCategoria" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
+                        <option value="">Categoria</option>
+                        <option value="E1">Esordienti 1°</option>
+                        <option value="E2">Esordienti 2°</option>
+                        <option value="G1">Giovanissimi 1°</option>
+                    </select>
+                    <select id="newRuolo" required class="px-4 py-2 bg-slate-800 rounded-lg border border-slate-600 text-white">
+                        <option value="">Ruolo</option>
+                        <option value="Portiere">Portiere</option>
+                        <option value="Difensore">Difensore</option>
+                        <option value="Centrocampista">Centrocampista</option>
+                        <option value="Attaccante">Attaccante</option>
+                    </select>
+                    <button type="submit" class="px-4 py-2 bg-cyan-500 text-slate-900 rounded-lg font-bold hover:bg-cyan-400">
+                        Aggiungi Giocatore
+                    </button>
+                </form>
+            </div>
         </div>
 
     </div>
@@ -118,6 +264,8 @@
         const auth = firebase.auth();
         const db = firebase.firestore();
 
+        let currentUser = null;
+
         auth.onAuthStateChanged(async (user) => {
             if (!user) {
                 window.location.href = 'login.html';
@@ -132,33 +280,56 @@
                 return;
             }
             
-            loadStats();
+            currentUser = user;
+            loadAllStats();
             loadPlayers();
+            loadPendingApprovals();
         });
 
         function logout() {
-            auth.signOut().then(() => {
-                window.location.href = 'login.html';
-            });
+            auth.signOut().then(() => window.location.href = 'login.html');
         }
 
-        async function loadStats() {
+        function showSection(section) {
+            ['dashboard', 'valutazioni', 'staff', 'approvazioni', 'database'].forEach(s => {
+                document.getElementById(`section-${s}`).classList.add('hidden');
+                document.getElementById(`nav-${s}`).classList.remove('bg-cyan-500/20', 'text-cyan-400');
+                document.getElementById(`nav-${s}`).classList.add('bg-slate-800', 'text-slate-400');
+            });
+            
+            document.getElementById(`section-${section}`).classList.remove('hidden');
+            document.getElementById(`nav-${section}`).classList.remove('bg-slate-800', 'text-slate-400');
+            document.getElementById(`nav-${section}`).classList.add('bg-cyan-500/20', 'text-cyan-400');
+            
+            if (section === 'valutazioni') {
+                loadValutazioniTecniche();
+                loadValutazioniPsicologiche('allenatori');
+            } else if (section === 'staff') {
+                loadStaff();
+            }
+        }
+
+        async function loadAllStats() {
             try {
-                const playersSnap = await db.collection('giocatori').get();
-                document.getElementById('statTotalPlayers').textContent = playersSnap.size;
+                const players = await db.collection('giocatori').get();
+                document.getElementById('statTotalPlayers').textContent = players.size;
                 
-                const today = new Date().toISOString().split('T')[0];
-                const evalsSnap = await db.collection('valutazioni')
-                    .where('data', '==', today).get();
-                document.getElementById('statTodayEvals').textContent = evalsSnap.size;
+                const valTecniche = await db.collection('valutazioni').get();
+                document.getElementById('statValTecniche').textContent = valTecniche.size;
                 
-                const staffSnap = await db.collection('users')
-                    .where('approved', '==', true).get();
-                document.getElementById('statActiveStaff').textContent = staffSnap.size;
+                const valPsico = await db.collection('valutazioni_psicologiche').get();
+                document.getElementById('statValPsicologiche').textContent = valPsico.size;
                 
-                const pendingSnap = await db.collection('users')
-                    .where('approved', '==', false).get();
-                document.getElementById('statPending').textContent = pendingSnap.size;
+                const staff = await db.collection('users').where('approved', '==', true).get();
+                document.getElementById('statActiveStaff').textContent = staff.size;
+                
+                const pending = await db.collection('users').where('approved', '==', false).get();
+                document.getElementById('statPending').textContent = pending.size;
+                
+                if (pending.size > 0) {
+                    document.getElementById('badgeApprovazioni').textContent = pending.size;
+                    document.getElementById('badgeApprovazioni').classList.remove('hidden');
+                }
             } catch (error) {
                 console.error('Errore stats:', error);
             }
@@ -167,34 +338,21 @@
         async function loadPlayers() {
             const categoria = document.getElementById('filterCat').value;
             const ruolo = document.getElementById('filterRuolo').value;
-            const search = document.getElementById('searchPlayer').value.toLowerCase().trim();
+            const search = document.getElementById('searchPlayer').value.toLowerCase();
             
             const grid = document.getElementById('playersGrid');
-            grid.innerHTML = '<div class="col-span-3 text-center py-8 text-slate-400">Caricamento giocatori...</div>';
             
             try {
                 const snapshot = await db.collection('giocatori').get();
-                
                 let players = [];
-                snapshot.forEach(doc => {
-                    players.push({ id: doc.id, ...doc.data() });
-                });
+                snapshot.forEach(doc => players.push({ id: doc.id, ...doc.data() }));
                 
-                players.sort((a, b) => {
-                    const cognomeA = (a.cognome || '').toLowerCase();
-                    const cognomeB = (b.cognome || '').toLowerCase();
-                    if (cognomeA < cognomeB) return -1;
-                    if (cognomeA > cognomeB) return 1;
-                    return (a.nome || '').localeCompare(b.nome || '');
-                });
+                players.sort((a, b) => (a.cognome || '').localeCompare(b.cognome || ''));
                 
                 let filtered = players.filter(p => {
                     if (categoria && p.categoria !== categoria) return false;
                     if (ruolo && p.ruolo !== ruolo) return false;
-                    if (search) {
-                        const fullName = `${p.nome || ''} ${p.cognome || ''}`.toLowerCase();
-                        if (!fullName.includes(search)) return false;
-                    }
+                    if (search && !(`${p.nome} ${p.cognome}`.toLowerCase().includes(search))) return false;
                     return true;
                 });
                 
@@ -206,56 +364,303 @@
                 }
                 
                 for (const player of filtered) {
+                    const valTecniche = await db.collection('valutazioni').where('giocatore_id', '==', player.id).get();
+                    const valPsico = await db.collection('valutazioni_psicologiche')
+                        .where('tipo_valutazione', '==', 'giocatore')
+                        .where('subject_id', '==', player.id)
+                        .get();
+                    
                     let avgScore = '--';
-                    try {
-                        const evals = await db.collection('valutazioni')
-                            .where('giocatore_id', '==', player.id)
-                            .limit(5)
-                            .get();
-                        
-                        if (!evals.empty) {
-                            let total = 0, count = 0;
-                            evals.forEach(e => {
-                                const data = e.data();
-                                Object.keys(data).forEach(key => {
-                                    if (typeof data[key] === 'number' && key !== 'timestamp') {
-                                        total += data[key];
-                                        count++;
-                                    }
-                                });
+                    if (!valTecniche.empty) {
+                        let total = 0, count = 0;
+                        valTecniche.forEach(v => {
+                            const d = v.data();
+                            ['controllo_palla', 'passaggio', 'tiro', 'velocita', 'resistenza', 'posizionamento'].forEach(campo => {
+                                if (typeof d[campo] === 'number') {
+                                    total += d[campo];
+                                    count++;
+                                }
                             });
-                            avgScore = count > 0 ? (total / count).toFixed(1) : '--';
-                        }
-                        
-                        grid.innerHTML += `
-                            <div class="glass-panel p-6 rounded-2xl border border-slate-700 hover:border-cyan-500/50 cursor-pointer transition-all group">
-                                <div class="flex justify-between items-start mb-4">
-                                    <div>
-                                        <h3 class="font-bold text-lg group-hover:text-cyan-400 transition-colors">${player.cognome || 'N/D'} ${player.nome || 'N/D'}</h3>
-                                        <p class="text-sm text-slate-400">${player.categoria || 'N/D'} • ${player.ruolo || 'N/D'}</p>
-                                    </div>
-                                    <div class="text-2xl font-bold text-cyan-400 font-display">${avgScore}</div>
-                                </div>
-                                <div class="flex gap-2 text-xs">
-                                    <span class="px-2 py-1 bg-slate-800 rounded">${player.data_nascita || 'N/D'}</span>
-                                    <span class="px-2 py-1 bg-slate-800 rounded">${evals.size} valutazioni</span>
-                                </div>
-                            </div>
-                        `;
-                    } catch (err) {
-                        console.error('Errore card:', err);
+                        });
+                        avgScore = count > 0 ? (total / count).toFixed(1) : '--';
                     }
+                    
+                    grid.innerHTML += `
+                        <div class="glass-panel p-6 rounded-2xl border border-slate-700 hover:border-cyan-500/50 transition-all">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <h3 class="font-bold text-lg">${player.cognome || 'N/D'} ${player.nome || 'N/D'}</h3>
+                                    <p class="text-sm text-slate-400">${player.categoria || 'N/D'} • ${player.ruolo || 'N/D'}</p>
+                                </div>
+                                <div class="text-2xl font-bold text-cyan-400 font-display">${avgScore}</div>
+                            </div>
+                            <div class="flex gap-2 text-xs">
+                                <span class="px-2 py-1 bg-slate-800 rounded">${player.data_nascita || 'N/D'}</span>
+                                <span class="px-2 py-1 bg-purple-900/30 text-purple-400 rounded">${valTecniche.size} val. tecniche</span>
+                                <span class="px-2 py-1 bg-pink-900/30 text-pink-400 rounded">${valPsico.size} val. psico</span>
+                            </div>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                grid.innerHTML = `<div class="col-span-3 text-center py-8 text-red-400">Errore: ${error.message}</div>`;
+            }
+        }
+
+        // VALUTAZIONI
+        function showValutazioniTab(tab) {
+            document.getElementById('val-tecniche-content').classList.toggle('hidden', tab !== 'tecniche');
+            document.getElementById('val-psicologiche-content').classList.toggle('hidden', tab !== 'psicologiche');
+            
+            document.getElementById('tab-val-tecniche').className = tab === 'tecniche' 
+                ? 'px-4 py-2 rounded-full bg-purple-500/20 text-purple-400 font-semibold'
+                : 'px-4 py-2 rounded-full bg-slate-800 text-slate-400 font-semibold hover:text-white';
+                
+            document.getElementById('tab-val-psicologiche').className = tab === 'psicologiche'
+                ? 'px-4 py-2 rounded-full bg-pink-500/20 text-pink-400 font-semibold'
+                : 'px-4 py-2 rounded-full bg-slate-800 text-slate-400 font-semibold hover:text-white';
+        }
+
+        function showPsicoSubTab(subtab) {
+            loadValutazioniPsicologiche(subtab);
+            document.getElementById('subtab-allenatori').className = subtab === 'allenatori'
+                ? 'text-sm px-3 py-1 rounded bg-pink-500/20 text-pink-400'
+                : 'text-sm px-3 py-1 rounded bg-slate-800 text-slate-400 hover:text-white';
+            document.getElementById('subtab-giocatori').className = subtab === 'giocatori'
+                ? 'text-sm px-3 py-1 rounded bg-pink-500/20 text-pink-400'
+                : 'text-sm px-3 py-1 rounded bg-slate-800 text-slate-400 hover:text-white';
+        }
+
+        async function loadValutazioniTecniche() {
+            const container = document.getElementById('listaValTecniche');
+            container.innerHTML = '<p class="text-slate-500">Caricamento...</p>';
+            
+            try {
+                const snapshot = await db.collection('valutazioni').orderBy('timestamp', 'desc').get();
+                
+                if (snapshot.empty) {
+                    container.innerHTML = '<p class="text-slate-500">Nessuna valutazione tecnica</p>';
+                    return;
                 }
                 
-                lucide.createIcons();
-                
+                container.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const v = doc.data();
+                    const date = v.timestamp ? v.timestamp.toDate().toLocaleDateString('it-IT') : 'N/D';
+                    
+                    container.innerHTML += `
+                        <div class="p-3 bg-slate-800/30 rounded-lg border border-slate-700">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="text-purple-400 font-semibold">Giocatore</span>
+                                    <span class="text-slate-400 text-sm ml-2">${v.data || date}</span>
+                                    <p class="text-xs text-slate-500 mt-1">Allenatore: ${v.allenatore_nome || 'N/D'}</p>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-lg font-bold text-purple-400">
+                                        ${((v.controllo_palla + v.passaggio + v.tiro + v.velocita + v.resistenza + v.posizionamento) / 6).toFixed(1)}
+                                    </div>
+                                    <div class="text-xs text-slate-500">media</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
             } catch (error) {
-                console.error('Errore loadPlayers:', error);
-                grid.innerHTML = `<div class="col-span-3 text-center py-8 text-red-400">
-                    Errore: ${error.message}<br>
-                    <button onclick="loadPlayers()" class="mt-4 px-4 py-2 bg-cyan-500/20 text-cyan-400 rounded">Riprova</button>
-                </div>`;
+                container.innerHTML = `<p class="text-red-400">Errore: ${error.message}</p>`;
             }
+        }
+
+        async function loadValutazioniPsicologiche(tipo) {
+            const container = document.getElementById('listaValPsicologiche');
+            container.innerHTML = '<p class="text-slate-500">Caricamento...</p>';
+            
+            try {
+                const snapshot = await db.collection('valutazioni_psicologiche')
+                    .where('tipo_valutazione', '==', tipo)
+                    .orderBy('timestamp', 'desc')
+                    .get();
+                
+                if (snapshot.empty) {
+                    container.innerHTML = `<p class="text-slate-500">Nessuna valutazione psicologica per ${tipo}</p>`;
+                    return;
+                }
+                
+                container.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const v = doc.data();
+                    const date = v.timestamp ? v.timestamp.toDate().toLocaleDateString('it-IT') : 'N/D';
+                    
+                    let media = '--';
+                    if (tipo === 'allenatore') {
+                        const vals = [v.accetta_errore, v.stimola_positivamente, v.feedback_specifici, v.ambiente_sereno, v.inclusivo, v.aperto_dialogo].filter(x => typeof x === 'number');
+                        media = vals.length > 0 ? (vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(1) : '--';
+                    } else {
+                        const vals = [v.motivazione, v.gestione_stress, v.lavoro_squadra].filter(x => typeof x === 'number');
+                        media = vals.length > 0 ? (vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(1) : '--';
+                    }
+                    
+                    container.innerHTML += `
+                        <div class="p-3 bg-slate-800/30 rounded-lg border border-slate-700">
+                            <div class="flex justify-between items-start">
+                                <div>
+                                    <span class="text-pink-400 font-semibold">${v.subject_nome || 'N/D'}</span>
+                                    <span class="text-slate-400 text-sm ml-2">${v.data || date}</span>
+                                    <p class="text-xs text-slate-500 mt-1">Psicologo: ${v.psicologo_nome || 'N/D'}</p>
+                                    ${tipo === 'allenatore' ? `<p class="text-xs text-purple-400">Stile: ${v.stile_cognitivo || 'N/D'} • Prescrittivo: ${v.prescrittivo || 'N/D'}</p>` : ''}
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-lg font-bold text-pink-400">${media}</div>
+                                    <div class="text-xs text-slate-500">media</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+            } catch (error) {
+                container.innerHTML = `<p class="text-red-400">Errore: ${error.message}</p>`;
+            }
+        }
+
+        // STAFF
+        async function loadStaff() {
+            try {
+                const allSnapshot = await db.collection('users').where('role', '==', 'allenatore').where('approved', '==', true).get();
+                const psiSnapshot = await db.collection('users').where('role', '==', 'psicologo').where('approved', '==', true).get();
+                
+                const allContainer = document.getElementById('listaAllenatori');
+                const psiContainer = document.getElementById('listaPsicologi');
+                
+                // Allenatori
+                if (allSnapshot.empty) {
+                    allContainer.innerHTML = '<p class="text-slate-500">Nessun allenatore</p>';
+                } else {
+                    allContainer.innerHTML = '';
+                    allSnapshot.forEach(doc => {
+                        const u = doc.data();
+                        allContainer.innerHTML += `
+                            <div class="p-3 bg-slate-800/30 rounded-lg border border-slate-700 flex justify-between items-center">
+                                <div>
+                                    <div class="font-semibold">${u.name || 'N/D'}</div>
+                                    <div class="text-xs text-slate-500">${u.email || ''}</div>
+                                </div>
+                                <span class="text-xs bg-cyan-500/20 text-cyan-400 px-2 py-1 rounded">${u.categoria || 'N/D'}</span>
+                            </div>
+                        `;
+                    });
+                }
+                
+                // Psicologi
+                if (psiSnapshot.empty) {
+                    psiContainer.innerHTML = '<p class="text-slate-500">Nessun psicologo</p>';
+                } else {
+                    psiContainer.innerHTML = '';
+                    psiSnapshot.forEach(doc => {
+                        const u = doc.data();
+                        psiContainer.innerHTML += `
+                            <div class="p-3 bg-slate-800/30 rounded-lg border border-slate-700 flex justify-between items-center">
+                                <div>
+                                    <div class="font-semibold">${u.name || 'N/D'}</div>
+                                    <div class="text-xs text-slate-500">${u.email || ''}</div>
+                                </div>
+                                <span class="text-xs bg-pink-500/20 text-pink-400 px-2 py-1 rounded">Psicologo</span>
+                            </div>
+                        `;
+                    });
+                }
+            } catch (error) {
+                console.error('Errore staff:', error);
+            }
+        }
+
+        // APPROVAZIONI
+        async function loadPendingApprovals() {
+            const snapshot = await db.collection('users').where('approved', '==', false).get();
+            const container = document.getElementById('pendingApprovals');
+            
+            if (snapshot.empty) {
+                container.innerHTML = '<p class="text-slate-400 text-center py-8">Nessuna richiesta pendente</p>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            snapshot.forEach(doc => {
+                const u = doc.data();
+                container.innerHTML += `
+                    <div class="glass-panel p-6 rounded-2xl border border-slate-700 flex justify-between items-center">
+                        <div>
+                            <div class="font-bold text-lg">${u.name || 'N/D'}</div>
+                            <div class="text-sm text-slate-400">${u.email || ''} • ${u.role || 'N/D'}</div>
+                            ${u.categoria ? `<div class="text-xs text-cyan-400">Categoria: ${u.categoria}</div>` : ''}
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="approveUser('${doc.id}', true)" class="px-4 py-2 bg-green-500/20 text-green-400 rounded-lg hover:bg-green-500/30">Approva</button>
+                            <button onclick="approveUser('${doc.id}', false)" class="px-4 py-2 bg-red-500/20 text-red-400 rounded-lg hover:bg-red-500/30">Rifiuta</button>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+        async function approveUser(userId, approve) {
+            if (approve) {
+                await db.collection('users').doc(userId).update({ approved: true });
+            } else {
+                await db.collection('users').doc(userId).delete();
+            }
+            loadPendingApprovals();
+            loadAllStats();
+        }
+
+        // DATABASE
+        document.getElementById('addPlayerForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const newPlayer = {
+                nome: document.getElementById('newNome').value,
+                cognome: document.getElementById('newCognome').value,
+                data_nascita: document.getElementById('newDataNascita').value,
+                categoria: document.getElementById('newCategoria').value,
+                ruolo: document.getElementById('newRuolo').value,
+                created_at: firebase.firestore.FieldValue.serverTimestamp()
+            };
+            
+            await db.collection('giocatori').add(newPlayer);
+            alert('Giocatore aggiunto!');
+            e.target.reset();
+            loadAllStats();
+            loadPlayers();
+        });
+
+        // EXPORT
+        async function exportData(tipo) {
+            let csv = 'Tipo,ID,Data,Valutatore,Subject,';
+            
+            if (tipo === 'tecniche') {
+                csv += 'Controllo palla,Passaggio,Tiro,Velocità,Resistenza,Posizionamento,Note\n';
+                const snap = await db.collection('valutazioni').get();
+                snap.forEach(doc => {
+                    const v = doc.data();
+                    csv += `Tecnica,${doc.id},${v.data || ''},${v.allenatore_nome || ''},${v.giocatore_id || ''},`;
+                    csv += `${v.controllo_palla || ''},${v.passaggio || ''},${v.tiro || ''},${v.velocita || ''},${v.resistenza || ''},${v.posizionamento || ''},"${v.note || ''}"\n`;
+                });
+            } else {
+                csv += 'Media,Note\n';
+                const snap = await db.collection('valutazioni_psicologiche').get();
+                snap.forEach(doc => {
+                    const v = doc.data();
+                    const vals = [v.accetta_errore, v.stimola_positivamente, v.feedback_specifici, v.ambiente_sereno, v.inclusivo, v.aperto_dialogo].filter(x => typeof x === 'number');
+                    const media = vals.length > 0 ? (vals.reduce((a,b) => a+b, 0) / vals.length).toFixed(2) : '';
+                    csv += `Psicologica,${doc.id},${v.data || ''},${v.psicologo_nome || ''},${v.subject_nome || ''},${media},"${v.note || ''}"\n`;
+                });
+            }
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `export_${tipo}_${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
         }
 
         lucide.createIcons();
